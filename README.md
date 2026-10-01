@@ -1,42 +1,77 @@
 # AquaSim Web Model Viewer
 
-A lightweight, high-performance browser-based 3D engineering viewer for **AquaSim** `.amodel` marine simulation models.
+A lightweight, browser-based 3D engineering viewer for **AquaSim** `.amodel` marine aquaculture simulation files.
 
-Built entirely with **TypeScript**, **Three.js**, and **Vite**, with no backend or external framework dependencies. The application parses and renders `.amodel` XML files completely on the client side, keeping engineering data private and local.
+Built with **TypeScript**, **Three.js**, and **Vite** without external frameworks or backend servers. All `.amodel` XML files remain 100% client-side and are parsed directly in the browser.
 
 ---
 
 ## 📸 Screenshots
 
-| Cage & Net Close-up (with XML Colors) | Complete 1.1 km Mooring Array |
+| Floating Collar & Underwater Net Cone | Complete 1.1 km Mooring Array |
 |:---:|:---:|
 | ![Cage Close-up](public/aquasim_cage_preview.png) | ![Mooring Array](public/aquasim_viewer_preview.png) |
 
 ---
 
-## 🚀 Key Features
+## 📖 User Manual
 
-- **Client-Side XML Parsing:** Drag & drop or select `.amodel` files; parsed instantly via browser DOM APIs without file size uploads.
-- **Authentic AquaSim Colors:** Automatically extracts and applies RGB colors defined in `<color red="..." green="..." blue="..." />` for every beam, truss, and membrane component, with corresponding color swatches in the sidebar.
-- **Engineering Coordinate System:**
-  - Preserves exact AquaSim XYZ coordinates without axis swaps:
-    - **X:** Lateral
-    - **Y:** Longitudinal
-    - **Z:** Vertical depth / elevation (sea surface at $Z = 0$, seabed at negative depth).
-  - Sea-surface reference grid and scaled XYZ axes indicator.
-- **High-Performance Batched Rendering:**
-  - **Beams:** Batched `THREE.LineSegments` per component.
-  - **Trusses:** Batched `THREE.LineSegments` per component (cables, ropes, moorings).
-  - **Membranes:** Triangulated `THREE.BufferGeometry` (quads split into two triangles) with double-sided translucent shading.
-- **Hierarchical Model Tree & Visibility Toggles:**
-  - Expand/collapse categories (Beam, Truss, Membrane).
-  - Independent visibility checkboxes for whole categories or individual components.
-- **Dual Camera Fitting:**
-  - **Fit All:** Frames the entire model bounding box (over $1\,\text{km}$ mooring grid).
-  - **Focus Cage:** Zooms directly into the floating collar and underwater net cone ($\sim 50\,\text{m}$ span).
-- **Topology Validation & Statistics:**
-  - Validates all node references before drawing; missing nodes are logged and skipped without crashing.
-  - Live statistics display: node count, element counts per category, invalid references, and bounding box.
+### 1. Starting the Application
+1. Ensure [Node.js](https://nodejs.org/) (v18+) is installed.
+2. In the project directory, run:
+   ```bash
+   npm install
+   npm run dev
+   ```
+3. Open your browser at `http://127.0.0.1:5173/`.
+
+---
+
+### 2. Loading a Model
+You can load an `.amodel` file in three ways:
+- **Drag & Drop:** Drag an `.amodel` file from your desktop/file explorer directly onto the 3D viewport.
+- **File Dialog:** Click **"Open .amodel"** in the top toolbar to browse and select a file.
+- **One-Click Benchmark Sample:** Click **"Load Sample (testFile1)"** to immediately load and verify the included benchmark fish cage model.
+
+---
+
+### 3. 3D Viewport Navigation
+| Action | Mouse / Trackpad | Touch |
+|---|---|---|
+| **Rotate** | **Left-click + Drag** | One-finger swipe |
+| **Pan** | **Right-click + Drag** (or **Middle-click + Drag**) | Two-finger drag |
+| **Zoom** | **Mouse Scroll Wheel** | Pinch in / out |
+
+---
+
+### 4. Toolbar Controls
+- **Fit All:** Centers the camera to enclose the entire model bounding box (including seabed anchors over 1 km away).
+- **Focus Cage:** Zooms the camera directly in on the floating collar and underwater net cone (~50 m span).
+- **Grid:** Toggles the sea-surface reference grid on/off (positioned at water level $Z = 0$).
+- **Axes:** Toggles the 3D coordinate axes indicator on/off (Red = X, Green = Y, Blue = Z).
+
+---
+
+### 5. Model Hierarchy & Visibility Controls
+The left sidebar displays all components organized into three structural categories:
+- **Beam:** Rigid structural rings, collars, stusses, and pipes.
+- **Truss:** Mooring lines, bridle ropes, winch cables, and bottom chains.
+- **Membrane:** Aquaculture net panels, roof nets, and bottom cone nets.
+
+Each component entry includes:
+- **Checkbox:** Toggle visibility of the category or individual component.
+- **Color Swatch:** Matches the authentic RGB color configured in the AquaSim XML file (`<color red="..." green="..." blue="..." />`).
+- **Element Count Badge:** Number of physical elements in that component.
+- **Collapse/Expand Arrow (▼/▶):** Expand or collapse category lists.
+
+---
+
+### 6. Model Statistics & Coordinate System
+- **Model Statistics:** Displays total node count, element count, component breakdown, invalid reference count, and exact bounding box coordinates in meters.
+- **Coordinate Convention:**
+  - **X (Red):** Lateral dimension
+  - **Y (Green):** Longitudinal dimension
+  - **Z (Blue):** Vertical depth/elevation ($Z = 0$ is the water surface, negative $Z$ represents water depth toward the seabed).
 
 ---
 
@@ -50,13 +85,13 @@ Built entirely with **TypeScript**, **Three.js**, and **Vite**, with no backend 
 | **Truss Components / Elements** | 33 components / 3,159 elements |
 | **Membrane Components / Elements** | 7 components / 3,180 elements |
 | **Invalid References** | 0 |
-| **Bounding Box X** | $-548.787\,\text{m} \rightarrow +548.787\,\text{m}$ |
-| **Bounding Box Y** | $-548.787\,\text{m} \rightarrow +548.787\,\text{m}$ |
-| **Bounding Box Z** | $-190.824\,\text{m} \rightarrow 0.000\,\text{m}$ (Seabed to Surface) |
+| **Bounding Box X** | $-548.787\,\text{m} \rightarrow +548.787\,\text{m}$ (1,097.57 m span) |
+| **Bounding Box Y** | $-548.787\,\text{m} \rightarrow +548.787\,\text{m}$ (1,097.57 m span) |
+| **Bounding Box Z** | $-190.824\,\text{m} \rightarrow 0.000\,\text{m}$ (190.82 m water depth) |
 
 ---
 
-## 🏗️ Architecture
+## 🛠️ Architecture & Technology
 
 ```text
 AquaSim XML (.amodel)
@@ -69,34 +104,29 @@ AquaSim XML (.amodel)
        │
        ▼
 [ AquaSimViewer.ts ]  ── Three.js rendering layer (Z-up camera, OrbitControls)
-  ├── beamRenderer.ts      ── Batched LineSegments
-  ├── trussRenderer.ts     ── Batched LineSegments
-  └── membraneRenderer.ts  ── Triangulated BufferGeometry with authentic colors
+  ├── beamRenderer.ts      ── Batched LineSegments with component colors
+  ├── trussRenderer.ts     ── Batched LineSegments with component colors
+  └── membraneRenderer.ts  ── Triangulated BufferGeometry with transparent shading
 ```
 
 ---
 
-## 💻 Quick Start
+## 🧪 Testing & Production Build
 
-### 1. Install Dependencies
-```bash
-npm install
-```
-
-### 2. Start Development Server
-```bash
-npm run dev
-```
-Open [http://127.0.0.1:5173/](http://127.0.0.1:5173/) in your web browser.
-
-### 3. Run Automated Tests
+### Run Unit Tests
 ```bash
 npm test
 ```
-Executes unit tests verifying node extraction, beam/truss/membrane connectivity, error handling, broken reference resilience, and renderer geometry.
+Runs 11 automated Vitest tests covering:
+- Node coordinate extraction with non-sequential IDs
+- Beam, Truss, and Membrane element connectivity
+- Component `<color>` attribute extraction
+- Broken node reference tolerance and warnings
+- Complete parsing of `testFile1.amodel`
+- Batched `LineSegments` and quad-to-triangle geometry generation
 
-### 4. Build for Production
+### Build Production Bundle
 ```bash
 npm run build
 ```
-Generates an optimized static bundle in `dist/`.
+Generates an optimized, minified static distribution in `dist/`.
