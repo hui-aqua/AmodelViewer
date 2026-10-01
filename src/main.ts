@@ -10,11 +10,24 @@ function init() {
     const fileInput = document.getElementById('file-input') as HTMLInputElement;
     const btnOpenFile = document.getElementById('btn-open-file') as HTMLButtonElement;
     const btnLoadSample = document.getElementById('btn-load-sample') as HTMLButtonElement;
-    const selectSampleModel = document.getElementById('select-sample-model') as HTMLSelectElement | null;
     const btnFitView = document.getElementById('btn-fit-view') as HTMLButtonElement;
     const btnFitCage = document.getElementById('btn-fit-cage') as HTMLButtonElement;
+    const btnToggleCamera = document.getElementById('btn-toggle-camera') as HTMLButtonElement | null;
+    const btnBoxCam = document.getElementById('btn-box-cam') as HTMLButtonElement | null;
+    const selectRenderMode = document.getElementById('select-render-mode') as HTMLSelectElement | null;
     const btnToggleGrid = document.getElementById('btn-toggle-grid') as HTMLButtonElement;
     const btnToggleAxes = document.getElementById('btn-toggle-axes') as HTMLButtonElement;
+
+    // View Orientation Buttons
+    const btnViewX = document.getElementById('btn-view-x') as HTMLButtonElement | null;
+    const btnViewY = document.getElementById('btn-view-y') as HTMLButtonElement | null;
+    const btnViewZ = document.getElementById('btn-view-z') as HTMLButtonElement | null;
+    const btnViewIso = document.getElementById('btn-view-iso') as HTMLButtonElement | null;
+
+    // Plane Grid Buttons
+    const btnPlaneXY = document.getElementById('btn-plane-xy') as HTMLButtonElement | null;
+    const btnPlaneXZ = document.getElementById('btn-plane-xz') as HTMLButtonElement | null;
+    const btnPlaneYZ = document.getElementById('btn-plane-yz') as HTMLButtonElement | null;
 
     const treeContainer = document.getElementById('model-tree') as HTMLElement;
     const statsContainer = document.getElementById('model-stats') as HTMLElement;
@@ -95,10 +108,11 @@ function init() {
         fileInput.click();
     });
 
-    function loadActiveSample() {
-        const url = selectSampleModel ? selectSampleModel.value : './models/testFile1.amodel';
-        const filename = url.split('/').pop() || 'testFile1.amodel';
-        loadSampleModel(url, filename, {
+    const sampleUrl = './models/ENCC100323640.amodel';
+    const sampleName = 'ENCC100323640.amodel';
+
+    btnLoadSample.addEventListener('click', () => {
+        loadSampleModel(sampleUrl, sampleName, {
             onLoadStart: (name) => {
                 showLoading(`Loading benchmark sample "${name}"...`);
                 footerFilename.textContent = name;
@@ -107,12 +121,7 @@ function init() {
             onLoadSuccess: handleModelLoaded,
             onLoadError: handleModelError
         });
-    }
-
-    btnLoadSample.addEventListener('click', loadActiveSample);
-    if (selectSampleModel) {
-        selectSampleModel.addEventListener('change', loadActiveSample);
-    }
+    });
 
     btnFitView.addEventListener('click', () => {
         viewer.fitView();
@@ -122,25 +131,76 @@ function init() {
         viewer.fitCageView();
     });
 
-    // Section scale slider and render mode
-    const scaleSlider = document.getElementById('scale-slider') as HTMLInputElement | null;
-    const scaleLabel = document.getElementById('scale-label') as HTMLElement | null;
-    const selectRenderMode = document.getElementById('select-render-mode') as HTMLSelectElement | null;
+    // 7. Camera Projection Switcher (Perspective <-> Orthographic)
+    function updateCameraButtons(mode: 'perspective' | 'orthographic') {
+        const isPersp = mode === 'perspective';
+        if (btnToggleCamera) {
+            btnToggleCamera.textContent = isPersp ? 'Persp' : 'Ortho';
+            btnToggleCamera.title = isPersp ? 'Switch to Orthographic camera' : 'Switch to Perspective camera';
+        }
+        if (btnBoxCam) {
+            btnBoxCam.textContent = isPersp ? 'PERSP' : 'ORTHO';
+            btnBoxCam.title = isPersp ? 'Perspective projection (click for Ortho)' : 'Orthographic projection (click for Persp)';
+        }
+    }
 
-    if (scaleSlider && scaleLabel) {
-        scaleSlider.addEventListener('input', () => {
-            const val = parseFloat(scaleSlider.value);
-            scaleLabel.textContent = `${val.toFixed(1)}x`;
-            viewer.setSectionScale(val);
+    function handleToggleCamera() {
+        const newMode = viewer.toggleCameraMode();
+        updateCameraButtons(newMode);
+    }
+
+    if (btnToggleCamera) {
+        btnToggleCamera.addEventListener('click', handleToggleCamera);
+    }
+    if (btnBoxCam) {
+        btnBoxCam.addEventListener('click', handleToggleCamera);
+    }
+
+    // 8. Quick View Alignment Buttons (X+, Y+, Z+, Iso)
+    if (btnViewX) {
+        btnViewX.addEventListener('click', () => viewer.alignView('x+'));
+    }
+    if (btnViewY) {
+        btnViewY.addEventListener('click', () => viewer.alignView('y+'));
+    }
+    if (btnViewZ) {
+        btnViewZ.addEventListener('click', () => viewer.alignView('z+'));
+    }
+    if (btnViewIso) {
+        btnViewIso.addEventListener('click', () => viewer.alignView('iso'));
+    }
+
+    // 9. Reference Grid Plane Toggles (XY, XZ, YZ)
+    if (btnPlaneXY) {
+        btnPlaneXY.addEventListener('click', () => {
+            const next = !viewer.getPlaneVisibility('xy');
+            viewer.setPlaneVisibility('xy', next);
+            btnPlaneXY.classList.toggle('active', next);
+        });
+    }
+    if (btnPlaneXZ) {
+        btnPlaneXZ.addEventListener('click', () => {
+            const next = !viewer.getPlaneVisibility('xz');
+            viewer.setPlaneVisibility('xz', next);
+            btnPlaneXZ.classList.toggle('active', next);
+        });
+    }
+    if (btnPlaneYZ) {
+        btnPlaneYZ.addEventListener('click', () => {
+            const next = !viewer.getPlaneVisibility('yz');
+            viewer.setPlaneVisibility('yz', next);
+            btnPlaneYZ.classList.toggle('active', next);
         });
     }
 
+    // Render Mode (Solid / Wireframe / Both)
     if (selectRenderMode) {
         selectRenderMode.addEventListener('change', () => {
             viewer.setRenderMode(selectRenderMode.value as 'solid' | 'wireframe' | 'both');
         });
     }
 
+    // Master Grid & Axes Toggles
     btnToggleGrid.addEventListener('click', () => {
         isGridVisible = !isGridVisible;
         viewer.setGridVisibility(isGridVisible);
@@ -153,8 +213,8 @@ function init() {
         btnToggleAxes.classList.toggle('btn-active', isAxesVisible);
     });
 
-    // Automatically load testFile1.amodel on startup for instant validation
-    loadSampleModel('./models/testFile1.amodel', 'testFile1.amodel', {
+    // 10. Automatically load ENCC100323640.amodel on startup
+    loadSampleModel(sampleUrl, sampleName, {
         onLoadStart: (name) => {
             showLoading(`Loading benchmark sample "${name}"...`);
             footerFilename.textContent = name;

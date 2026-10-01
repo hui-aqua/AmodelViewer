@@ -35,18 +35,10 @@
                     </svg>
                     Open .amodel
                 </button>
-                <div class="sample-picker-group">
-                    <select id="select-sample-model" class="select-sample" title="Select a benchmark sample model">
-                        <option value="./models/testFile1.amodel">testFile1 (Benchmark Cage & Moorings)</option>
-                        <option value="./models/winch_cage.amodel">winch_cage (Winch Cage System)</option>
-                        <option value="./models/ENC172233860Winch_nearSurface.amodel">ENC172233860 (Near-Surface Winch)</option>
-                        <option value="./models/ENCC100323640.amodel">ENCC100323640 (Cage Configuration)</option>
-                    </select>
-                    <button id="btn-load-sample" class="btn btn-secondary" title="Load selected sample model">
-                        Load Sample
-                    </button>
-                </div>
-                <button id="btn-fit-view" class="btn btn-icon" title="Fit Camera to Entire Model (including Moorings)">
+                <button id="btn-load-sample" class="btn btn-secondary" title="Load the benchmark ENCC100323640 model">
+                    Load Sample (ENCC100323640)
+                </button>
+                <button id="btn-fit-view" class="btn btn-icon" title="Fit Camera to Entire Model">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>
                     </svg>
@@ -60,11 +52,9 @@
                     Focus Cage
                 </button>
                 <div class="toolbar-divider"></div>
-                <div class="toolbar-control-group" title="Scale beam and truss cross-sections (solid 3D thickness)">
-                    <span class="control-label">Scale:</span>
-                    <input type="range" id="scale-slider" min="0.5" max="20" step="0.5" value="1" class="scale-slider" />
-                    <span id="scale-label" class="scale-badge">1.0x</span>
-                </div>
+                <button id="btn-toggle-camera" class="btn btn-icon" title="Switch between Perspective and Orthographic Camera">
+                    Persp
+                </button>
                 <select id="select-render-mode" class="select-mode" title="Display mode for structural elements">
                     <option value="both">Solid + Centerline</option>
                     <option value="solid">Solid 3D Only</option>
@@ -121,6 +111,26 @@
                 <div id="loading-spinner" class="loading-overlay" style="display: none;">
                     <div class="spinner"></div>
                     <div id="loading-text" class="loading-text">Parsing AquaSim XML...</div>
+                </div>
+
+                <!-- Floating View & Plane Orientation Control Box -->
+                <div id="view-control-box" class="view-control-box">
+                    <div class="view-box-header">
+                        <span class="view-box-title">VIEW / PLANES</span>
+                        <button id="btn-box-cam" class="cam-badge" title="Click to toggle Perspective / Orthographic projection">PERSP</button>
+                    </div>
+                    <div class="view-box-row">
+                        <button id="btn-view-x" class="v-btn v-btn-x" title="Front Elevation View (X+)">X+</button>
+                        <button id="btn-view-y" class="v-btn v-btn-y" title="Side Elevation View (Y+)">Y+</button>
+                        <button id="btn-view-z" class="v-btn v-btn-z" title="Top Plan View (Z+)">Z+</button>
+                        <button id="btn-view-iso" class="v-btn v-btn-iso" title="Reset to Isometric 3D View">3D</button>
+                    </div>
+                    <div class="view-box-row planes-row">
+                        <span class="plane-label">Planes:</span>
+                        <button id="btn-plane-xy" class="p-btn active" title="Toggle Sea Surface (XY Plane at Z=0)">XY</button>
+                        <button id="btn-plane-xz" class="p-btn" title="Toggle Lateral Cross-Section (XZ Plane at Y=0)">XZ</button>
+                        <button id="btn-plane-yz" class="p-btn" title="Toggle Longitudinal Cross-Section (YZ Plane at X=0)">YZ</button>
+                    </div>
                 </div>
 
                 <!-- Coordinate orientation legend in bottom right of viewport -->

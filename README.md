@@ -70,11 +70,7 @@ If you want to modify the code or contribute to the project:
 ### Step 1: Open or Select an AquaSim Model
 - **Drag & Drop:** Simply drag any `.amodel` file from your desktop or file manager and drop it anywhere onto the 3D viewport.
 - **Open File Button:** Click the blue **"Open .amodel"** button in the top toolbar to browse your local drives.
-- **Sample Benchmark Models:** Don't have a model file at hand? Use the built-in sample dropdown menu in the top toolbar to explore 4 real pre-loaded aquaculture models:
-  - `testFile1.amodel`: Full marine fish farm cage with underwater net cone and 1.1 km catenary mooring lines.
-  - `winch_cage.amodel`: Winch-lowered cage assembly with suspension bridles.
-  - `ENC172233860Winch_nearSurface.amodel`: Subsurface winch cage configuration.
-  - `ENCC100323640.amodel`: Heavy-duty circular cage model.
+- **Sample Benchmark Model:** Click **"Load Sample (ENCC100323640)"** to immediately load the included aquaculture cage model with realistic nets, collars, and moorings.
 
 ---
 
@@ -93,22 +89,38 @@ Navigate around your model using intuitive mouse, trackpad, or touch gestures:
 
 | Button / Control | Description | When to Use |
 |---|---|---|
-| **Fit All** | Frames the camera to show the **entire model** bounding box. | Use when you want an overview of the whole marine array, including seabed anchor lines over 1 km away. |
-| **Focus Cage** | Zooms camera directly in on the **floating collar and net cage**. | Use when inspecting the central cage structure (~50 m diameter) without getting lost in distant mooring lines. |
-| **Scale Slider** (`0.5x` - `20x`) | Dynamically adjusts the **3D thickness of cables, ropes, and pipes**. | Fine mooring lines and cables can be hard to see when zoomed out. Increase the slider to make thin ropes clearly visible! |
-| **Display Mode** | Switch between **Solid + Centerline**, **Solid 3D Only**, or **Centerline Only**. | Choose *Solid 3D* for realistic cross-sections, or *Centerline* for pure wireframe structural analysis. |
-| **Grid** | Toggles the sea-surface reference grid on/off. | Positioned at water level ($Z = 0$) to easily differentiate surface structures from submerged components. |
-| **Axes** | Toggles 3D coordinate orientation indicators. | Red = lateral (X), Green = longitudinal (Y), Blue = vertical depth (Z). |
+| **Load Sample** | Loads the included `ENCC100323640.amodel` benchmark model. | Immediate testing with a single click. |
+| **Fit All** | Frames the camera to show the **entire model** bounding box. | Full overview of the whole marine installation. |
+| **Focus Cage** | Zooms camera directly in on the **floating collar and net cage**. | Close-up inspection of the cage structure (~70 m diameter). |
+| **Persp / Ortho Switcher** | Toggles camera between **Perspective** and **Orthographic** projection. | Switch to **Ortho** for parallel lines and true CAD engineering scale without perspective distortion! |
+| **Display Mode** | Switch between **Solid + Centerline**, **Solid 3D Only**, or **Centerline Only**. | Choose *Solid 3D* for realistic volumes, or *Centerline* for pure structural line diagrams. |
+| **Grid & Axes** | Toggles sea surface grid ($Z = 0$) and 3D coordinate axes. | Orientation reference (Red = X, Green = Y, Blue = Z). |
 
 ---
 
-### Step 4: Model Hierarchy & Component Toggles
+### Step 4: Floating View & Plane Orientation Control Box
+Located in the **top-right corner of the 3D viewport**, this floating CAD widget gives you fast engineering navigation:
+
+- **Quick View Alignments:**
+  - **`X+` (Front View):** Instantly snaps the camera to look along the lateral axis (side elevation).
+  - **`Y+` (Side View):** Snaps the camera to look along the longitudinal axis (front/aft elevation).
+  - **`Z+` (Top Plan View):** Looks straight down from above the water surface ($Z = 0$) onto the circular cage.
+  - **`3D` (Isometric):** Returns to the natural 3D isometric angle.
+- **Reference Plane Toggles ("Tone the XYZ Planes"):**
+  - **`XY` Button:** Toggles the Sea Surface plane grid at water level ($Z = 0$).
+  - **`XZ` Button:** Toggles the Lateral Vertical plane grid at $Y = 0$.
+  - **`YZ` Button:** Toggles the Longitudinal Vertical plane grid at $X = 0$.
+- **`PERSP` / `ORTHO` Badge:** Click to toggle projection directly from the widget.
+
+---
+
+### Step 5: Model Hierarchy & Component Toggles
 The left sidebar displays an interactive hierarchy of all structural components extracted from the `.amodel` file:
 
 - **Structural Categories:**
   - 🔵 **Beam Elements:** Rigid collars, floating rings, brackets, and pipe frames (displays cross-section dimensions, e.g., `Ø500mm` or `250×500mm`).
-  - 🟠 **Truss Elements:** Mooring catenary lines, anchor chains, bridle ropes, and winch cables (displays diameter, e.g., `Ø30mm`).
-  - 🟢 **Membrane Elements:** Triangulated aquaculture net panels, net bottoms, dome netting, and roofs.
+  - 🟠 **Truss Elements:** Mooring lines, anchor chains, bridle ropes, and winch cables (displays diameter, e.g., `Ø30mm`).
+  - 🟢 **Membrane Elements:** Triangulated aquaculture net panels, net bottoms, and side nets.
 - **Show / Hide Checkboxes:**
   - Uncheck the category checkbox to hide an entire group (e.g., hide all nets to clearly see the internal ropes and bottom weight rings).
   - Uncheck individual components to inspect specific rigging lines or structural segments.
@@ -116,7 +128,7 @@ The left sidebar displays an interactive hierarchy of all structural components 
 
 ---
 
-### Step 5: Model Statistics Panel
+### Step 6: Model Statistics Panel
 Located at the bottom of the left sidebar, providing instant numerical verification:
 - **Node Count:** Total number of 3D node coordinates.
 - **Element Count:** Detailed breakdown across Beams, Trusses, and Membranes.
@@ -125,19 +137,19 @@ Located at the bottom of the left sidebar, providing instant numerical verificat
 
 ---
 
-## 📊 Benchmark Model (`testFile1.amodel`)
+## 📊 Benchmark Model (`ENCC100323640.amodel`)
 
 | Metric | Measured Value |
 |---|---|
-| **Nodes** | 4,884 |
-| **Total Elements** | 7,039 |
-| **Beam Components / Elements** | 6 components / 700 elements |
-| **Truss Components / Elements** | 33 components / 3,159 elements |
-| **Membrane Components / Elements** | 7 components / 3,180 elements |
+| **Nodes** | 3,755 |
+| **Total Elements** | 4,948 |
+| **Beam Components** | 3 components |
+| **Truss Components** | 11 components |
+| **Membrane Components** | 2 components |
 | **Invalid References** | 0 |
-| **Bounding Box X** | $-548.787\,\text{m} \rightarrow +548.787\,\text{m}$ (1,097.57 m span) |
-| **Bounding Box Y** | $-548.787\,\text{m} \rightarrow +548.787\,\text{m}$ (1,097.57 m span) |
-| **Bounding Box Z** | $-190.824\,\text{m} \rightarrow 0.000\,\text{m}$ (190.82 m water depth) |
+| **Bounding Box X** | $-35.000\,\text{m} \rightarrow +35.000\,\text{m}$ (70.0 m cage diameter) |
+| **Bounding Box Y** | $-35.000\,\text{m} \rightarrow +35.000\,\text{m}$ (70.0 m cage diameter) |
+| **Bounding Box Z** | $-40.800\,\text{m} \rightarrow 0.000\,\text{m}$ (40.8 m submerged net depth) |
 
 ---
 

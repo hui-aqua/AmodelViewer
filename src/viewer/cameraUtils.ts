@@ -13,11 +13,11 @@ export function aquaSimToThree(x: number, y: number, z: number): THREE.Vector3 {
 }
 
 /**
- * Automatically fits camera to model bounding box.
+ * Automatically fits camera (Perspective or Orthographic) to model bounding box.
  * Sets orbit controls target to center and frames the structure nicely.
  */
 export function fitCameraToModel(
-    camera: THREE.PerspectiveCamera,
+    camera: THREE.PerspectiveCamera | THREE.OrthographicCamera,
     controls: OrbitControls,
     box: THREE.Box3,
     offsetMultiplier: number = 1.6
@@ -33,21 +33,36 @@ export function fitCameraToModel(
     const maxDim = Math.max(size.x, size.y, size.z);
     if (maxDim === 0) return;
 
-    const fov = camera.fov * (Math.PI / 180);
-    let cameraDistance = (maxDim / 2) / Math.tan(fov / 2);
-    cameraDistance *= offsetMultiplier;
-
     // View from an isometric angle looking towards the center (Z-up orientation)
-    // Offset camera in X, Y, and positive Z direction relative to center
     const direction = new THREE.Vector3(1, -1.2, 0.8).normalize();
-    const newPosition = center.clone().add(direction.multiplyScalar(cameraDistance));
 
-    camera.position.copy(newPosition);
+    if ('isPerspectiveCamera' in camera && camera.isPerspectiveCamera) {
+        const fov = camera.fov * (Math.PI / 180);
+        let cameraDistance = (maxDim / 2) / Math.tan(fov / 2);
+        cameraDistance *= offsetMultiplier;
 
-    // Ensure camera near and far clipping planes accommodate large mooring spans
-    camera.near = Math.max(0.1, cameraDistance / 1000);
-    camera.far = Math.max(5000, cameraDistance * 10);
-    camera.updateProjectionMatrix();
+        const newPosition = center.clone().add(direction.multiplyScalar(cameraDistance));
+        camera.position.copy(newPosition);
+
+        camera.near = Math.max(0.1, cameraDistance / 1000);
+        camera.far = Math.max(5000, cameraDistance * 10);
+        camera.updateProjectionMatrix();
+    } else if ('isOrthographicCamera' in camera && camera.isOrthographicCamera) {
+        const aspect = (camera.right - camera.left) / (camera.top - camera.bottom) || 1;
+        const frustumHeight = maxDim * offsetMultiplier;
+        const frustumWidth = frustumHeight * aspect;
+
+        camera.left = -frustumWidth / 2;
+        camera.right = frustumWidth / 2;
+        camera.top = frustumHeight / 2;
+        camera.bottom = -frustumHeight / 2;
+
+        const distance = maxDim * 2;
+        camera.position.copy(center).add(direction.multiplyScalar(distance));
+        camera.near = -distance * 5;
+        camera.far = distance * 5;
+        camera.updateProjectionMatrix();
+    }
 
     controls.target.copy(center);
     controls.update();

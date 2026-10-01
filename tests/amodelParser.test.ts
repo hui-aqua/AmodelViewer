@@ -154,57 +154,24 @@ describe('AquaSim Model Parser', () => {
         expect(model.report.warnings.length).toBe(2);
     });
 
-    it('should parse real testFile1.amodel accurately', () => {
-        const filePath = path.resolve(__dirname, '../public/models/testFile1.amodel');
-        const content = fs.readFileSync(filePath, 'utf-8');
-
-        const model = parseAmodelXml(content);
-        expect(model.nodes.size).toBe(4884);
-        expect(model.beams.length).toBe(6);
-        expect(model.report.beamElementCount).toBe(700);
-        expect(model.trusses.length).toBe(33);
-        expect(model.report.trussElementCount).toBe(3159);
-        expect(model.membranes.length).toBe(7);
-        expect(model.report.membraneElementCount).toBe(3180);
-        expect(model.report.totalElementCount).toBe(7039);
-        expect(model.report.invalidReferences).toBe(0);
-
-        // Bounding box checks
-        expect(model.boundingBox.min.x).toBeCloseTo(-548.787);
-        expect(model.boundingBox.max.x).toBeCloseTo(548.787);
-        expect(model.boundingBox.min.y).toBeCloseTo(-548.787);
-        expect(model.boundingBox.max.y).toBeCloseTo(548.787);
-        expect(model.boundingBox.min.z).toBeCloseTo(-190.824);
-        expect(model.boundingBox.max.z).toBeCloseTo(0);
-    });
-
-    it('should parse real winch_cage.amodel accurately', () => {
-        const filePath = path.resolve(__dirname, '../public/models/winch_cage.amodel');
-        const content = fs.readFileSync(filePath, 'utf-8');
-
-        const model = parseAmodelXml(content);
-        expect(model.nodes.size).toBeGreaterThan(1000);
-        expect(model.report.totalElementCount).toBeGreaterThan(1000);
-        expect(model.report.invalidReferences).toBe(0);
-    });
-
-    it('should parse real ENC172233860Winch_nearSurface.amodel accurately', () => {
-        const filePath = path.resolve(__dirname, '../public/models/ENC172233860Winch_nearSurface.amodel');
-        const content = fs.readFileSync(filePath, 'utf-8');
-
-        const model = parseAmodelXml(content);
-        expect(model.nodes.size).toBeGreaterThan(1000);
-        expect(model.report.totalElementCount).toBeGreaterThan(1000);
-        expect(model.report.invalidReferences).toBe(0);
-    });
-
     it('should parse real ENCC100323640.amodel accurately', () => {
         const filePath = path.resolve(__dirname, '../public/models/ENCC100323640.amodel');
         const content = fs.readFileSync(filePath, 'utf-8');
 
         const model = parseAmodelXml(content);
-        expect(model.nodes.size).toBeGreaterThan(500);
-        expect(model.report.totalElementCount).toBeGreaterThan(500);
+        expect(model.nodes.size).toBe(3755);
+        expect(model.beams.length).toBe(3);
+        expect(model.trusses.length).toBe(11);
+        expect(model.membranes.length).toBe(2);
+        expect(model.report.totalElementCount).toBe(4948);
         expect(model.report.invalidReferences).toBe(0);
+
+        // Bounding box checks (35m radius circular cage, 40.8m depth)
+        expect(model.boundingBox.min.x).toBeCloseTo(-35.0);
+        expect(model.boundingBox.max.x).toBeCloseTo(35.0);
+        expect(model.boundingBox.min.y).toBeCloseTo(-35.0);
+        expect(model.boundingBox.max.y).toBeCloseTo(35.0);
+        expect(model.boundingBox.min.z).toBeCloseTo(-40.8);
+        expect(model.boundingBox.max.z).toBeCloseTo(0.0);
     });
 });

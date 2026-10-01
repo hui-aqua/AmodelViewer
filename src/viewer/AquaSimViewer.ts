@@ -9,7 +9,11 @@ import { fitCameraToModel } from './cameraUtils';
 export class AquaSimViewer {
     private container: HTMLElement;
     private scene: THREE.Scene;
-    private camera: THREE.PerspectiveCamera;
+    private perspCamera: THREE.PerspectiveCamera;
+    private orthoCamera: THREE.OrthographicCamera;
+    private camera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
+    private cameraMode: 'perspective' | 'orthographic' = 'perspective';
+
     private renderer: THREE.WebGLRenderer;
     private controls: OrbitControls;
 
@@ -19,7 +23,13 @@ export class AquaSimViewer {
     private membraneGroup: THREE.Group;
 
     private axesHelper: THREE.AxesHelper;
-    private gridHelper: THREE.GridHelper | null = null;
+
+    // XYZ Reference Grid Planes
+    private gridHelperXY: THREE.GridHelper | null = null; // Sea surface Z=0
+    private gridHelperXZ: THREE.GridHelper | null = null; // Lateral Y=0
+    private gridHelperYZ: THREE.GridHelper | null = null; // Longitudinal X=0
+    private planeVisibility = { xy: true, xz: false, yz: false };
+
     private currentBounds: THREE.Box3 = new THREE.Box3();
     private animFrameId: number | null = null;
     private isDestroyed: boolean = false;
@@ -38,12 +48,30 @@ export class AquaSimViewer {
         this.scene = new THREE.Scene();
         this.scene.background = new THREE.Color(0x0f172a); // Slate-900 engineering dark background
 
-        // 2. Camera: in AquaSim, +Z is vertical depth/elevation (sea surface at Z=0, seabed negative)
+        // 2. Cameras setup (Perspective + Orthographic)
         const width = this.container.clientWidth || window.innerWidth;
         const height = this.container.clientHeight || window.innerHeight;
-        this.camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 10000);
-        this.camera.up.set(0, 0, 1); // Set Z as vertical up vector
-        this.camera.position.set(200, -200, 150);
+        const aspect = width / height;
+
+        // Perspective Camera (+Z is vertical depth/elevation)
+        this.perspCamera = new THREE.PerspectiveCamera(45, aspect, 0.1, 10000);
+        this.perspCamera.up.set(0, 0, 1);
+        this.perspCamera.position.set(200, -200, 150);
+
+        // Orthographic Camera
+        const frustumSize = 300;
+        this.orthoCamera = new THREE.OrthographicCamera(
+            (-frustumSize * aspect) / 2,
+            (frustumSize * aspect) / 2,
+            frustumSize / 2,
+            -frustumSize / 2,
+            -10000,
+            10000
+        );
+        this.orthoCamera.up.set(0, 0, 1);
+        this.orthoCamera.position.set(200, -200, 150);
+
+        this.camera = this.perspCamera;
 
         // 3. Renderer
         this.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -75,7 +103,7 @@ export class AquaSimViewer {
         this.axesHelper.renderOrder = 999;
         this.scene.add(this.axesHelper);
 
-        this.setupWaterSurfaceGrid(200);
+        this.setupReferenceGridPlanes(200);
 
         // 7. Model Groups
         this.modelGroup = new THREE.Group();
@@ -103,18 +131,171 @@ export class AquaSimViewer {
         this.animate();
     }
 
-    private setupWaterSurfaceGrid(size: number): void {
-        if (this.gridHelper) {
-            this.scene.remove(this.gridHelper);
-            this.gridHelper.dispose();
-        }
-        // Three.js GridHelper defaults to X-Z plane (Y-up).
-        // For AquaSim Z-up, rotate 90 deg around X so it sits in the X-Y plane at Z=0 (sea surface).
+    /**
+     * Setup 3 reference grid planes:
+     * - XY plane (Sea Surface Z=0)
+     * - XZ plane (Lateral vertical plane Y=0)
+     * - YZ plane (Longitudinal vertical plane X=0)
+     */
+    private setupReferenceGridPlanes(size: number): void {
         const divisions = 40;
-        this.gridHelper = new THREE.GridHelper(size, divisions, 0x38bdf8, 0x1e293b);
-        this.gridHelper.rotation.x = Math.PI / 2;
-        this.gridHelper.position.set(0, 0, 0);
-        this.scene.add(this.gridHelper);
+
+        // Remove old helpers
+        if (this.gridHelperXY) {
+            this.scene.remove(this.gridHelperXY);
+            this.gridHelperXY.dispose();
+        }
+        if (this.gridHelperXZ) {
+            this.scene.remove(this.gridHelperXZ);
+            this.gridHelperXZ.dispose();
+        }
+        if (this.gridHelperYZ) {
+            this.scene.remove(this.gridHelperYZ);
+            this.gridHelperYZ.dispose();
+        }
+
+        // 1. XY Grid (Sea Surface at Z=0): Cyan/Slate
+        this.gridHelperXY = new THREE.GridHelper(size, divisions, 0x38bdf8, 0x1e293b);
+        this.gridHelperXY.rotation.x = Math.PI / 2;
+        this.gridHelperXY.position.set(0, 0, 0);
+        this.gridHelperXY.visible = this.planeVisibility.xy;
+        this.scene.add(this.gridHelperXY);
+
+        // 2. XZ Grid (Lateral Cross-section at Y=0): Emerald/Slate
+        this.gridHelperXZ = new THREE.GridHelper(size, divisions, 0x10b981, 0x1e293b);
+        this.gridHelperXZ.position.set(0, 0, 0);
+        this.gridHelperXZ.visible = this.planeVisibility.xz;
+        this.scene.add(this.gridHelperXZ);
+
+        // 3. YZ Grid (Longitudinal Cross-section at X=0): Rose/Slate
+        this.gridHelperYZ = new THREE.GridHelper(size, divisions, 0xf43f5e, 0x1e293b);
+        this.gridHelperYZ.rotation.z = Math.PI / 2;
+        this.gridHelperYZ.position.set(0, 0, 0);
+        this.gridHelperYZ.visible = this.planeVisibility.yz;
+        this.scene.add(this.gridHelperYZ);
+    }
+
+    /**
+     * Toggle visibility of specific XYZ reference planes
+     */
+    public setPlaneVisibility(plane: 'xy' | 'xz' | 'yz', visible: boolean): void {
+        this.planeVisibility[plane] = visible;
+        if (plane === 'xy' && this.gridHelperXY) {
+            this.gridHelperXY.visible = visible;
+        } else if (plane === 'xz' && this.gridHelperXZ) {
+            this.gridHelperXZ.visible = visible;
+        } else if (plane === 'yz' && this.gridHelperYZ) {
+            this.gridHelperYZ.visible = visible;
+        }
+    }
+
+    public getPlaneVisibility(plane: 'xy' | 'xz' | 'yz'): boolean {
+        return this.planeVisibility[plane];
+    }
+
+    /**
+     * Switch between Perspective and Orthographic camera modes
+     */
+    public setCameraMode(mode: 'perspective' | 'orthographic'): void {
+        if (this.cameraMode === mode) return;
+        this.cameraMode = mode;
+
+        const width = this.container.clientWidth || window.innerWidth;
+        const height = this.container.clientHeight || window.innerHeight;
+        const aspect = width / height;
+
+        if (mode === 'orthographic') {
+            const distance = this.perspCamera.position.distanceTo(this.controls.target);
+            const fovRad = THREE.MathUtils.degToRad(this.perspCamera.fov);
+            const frustumHeight = 2 * distance * Math.tan(fovRad / 2);
+            const frustumWidth = frustumHeight * aspect;
+
+            this.orthoCamera.left = -frustumWidth / 2;
+            this.orthoCamera.right = frustumWidth / 2;
+            this.orthoCamera.top = frustumHeight / 2;
+            this.orthoCamera.bottom = -frustumHeight / 2;
+            this.orthoCamera.position.copy(this.perspCamera.position);
+            this.orthoCamera.up.copy(this.perspCamera.up);
+            this.orthoCamera.lookAt(this.controls.target);
+            this.orthoCamera.updateProjectionMatrix();
+
+            this.camera = this.orthoCamera;
+            this.controls.object = this.orthoCamera;
+        } else {
+            this.perspCamera.position.copy(this.orthoCamera.position);
+            this.perspCamera.up.copy(this.orthoCamera.up);
+            this.perspCamera.lookAt(this.controls.target);
+            this.perspCamera.updateProjectionMatrix();
+
+            this.camera = this.perspCamera;
+            this.controls.object = this.perspCamera;
+        }
+
+        this.controls.update();
+    }
+
+    public getCameraMode(): 'perspective' | 'orthographic' {
+        return this.cameraMode;
+    }
+
+    public toggleCameraMode(): 'perspective' | 'orthographic' {
+        const nextMode = this.cameraMode === 'perspective' ? 'orthographic' : 'perspective';
+        this.setCameraMode(nextMode);
+        return nextMode;
+    }
+
+    /**
+     * Align camera quickly to X+, Y+, Z+, or Isometric 3D views
+     */
+    public alignView(axis: 'x+' | 'y+' | 'z+' | 'iso'): void {
+        const center = new THREE.Vector3();
+        const size = new THREE.Vector3();
+
+        if (!this.currentBounds.isEmpty()) {
+            this.currentBounds.getCenter(center);
+            this.currentBounds.getSize(size);
+        }
+
+        const maxDim = Math.max(size.x, size.y, size.z, 50);
+        const distance = maxDim * 1.5;
+
+        switch (axis) {
+            case 'z+': // Top / Sea surface plan view
+                this.camera.position.set(center.x, center.y, center.z + distance);
+                this.camera.up.set(0, 1, 0); // +Y points up in top plan view
+                break;
+            case 'x+': // Front elevation view (looking along lateral axis)
+                this.camera.position.set(center.x + distance, center.y, center.z);
+                this.camera.up.set(0, 0, 1);
+                break;
+            case 'y+': // Side elevation view (looking along longitudinal axis)
+                this.camera.position.set(center.x, center.y + distance, center.z);
+                this.camera.up.set(0, 0, 1);
+                break;
+            case 'iso': // Natural 3D isometric view
+            default: {
+                const dir = new THREE.Vector3(1, -1.2, 0.8).normalize();
+                this.camera.position.copy(center).add(dir.multiplyScalar(distance));
+                this.camera.up.set(0, 0, 1);
+                break;
+            }
+        }
+
+        this.controls.target.copy(center);
+        this.camera.lookAt(center);
+
+        if (this.cameraMode === 'orthographic') {
+            const aspect = (this.orthoCamera.right - this.orthoCamera.left) / (this.orthoCamera.top - this.orthoCamera.bottom) || 1;
+            const frustumHeight = maxDim * 1.4;
+            const frustumWidth = frustumHeight * aspect;
+            this.orthoCamera.left = -frustumWidth / 2;
+            this.orthoCamera.right = frustumWidth / 2;
+            this.orthoCamera.top = frustumHeight / 2;
+            this.orthoCamera.bottom = -frustumHeight / 2;
+            this.orthoCamera.updateProjectionMatrix();
+        }
+
+        this.controls.update();
     }
 
     private onResize = (): void => {
@@ -123,8 +304,23 @@ export class AquaSimViewer {
         const height = this.container.clientHeight;
         if (width === 0 || height === 0) return;
 
-        this.camera.aspect = width / height;
-        this.camera.updateProjectionMatrix();
+        const aspect = width / height;
+
+        if (this.cameraMode === 'perspective') {
+            this.perspCamera.aspect = aspect;
+            this.perspCamera.updateProjectionMatrix();
+        } else {
+            const distance = this.orthoCamera.position.distanceTo(this.controls.target);
+            const fovRad = THREE.MathUtils.degToRad(this.perspCamera.fov);
+            const frustumHeight = 2 * distance * Math.tan(fovRad / 2);
+            const frustumWidth = frustumHeight * aspect;
+            this.orthoCamera.left = -frustumWidth / 2;
+            this.orthoCamera.right = frustumWidth / 2;
+            this.orthoCamera.top = frustumHeight / 2;
+            this.orthoCamera.bottom = -frustumHeight / 2;
+            this.orthoCamera.updateProjectionMatrix();
+        }
+
         this.renderer.setSize(width, height);
     };
 
@@ -207,23 +403,15 @@ export class AquaSimViewer {
 
             // Scale axes and grid helper to model scale
             this.axesHelper.scale.setScalar(Math.max(10, maxDim * 0.15));
-            this.setupWaterSurfaceGrid(Math.max(200, Math.ceil(maxDim * 1.5 / 100) * 100));
+            this.setupReferenceGridPlanes(Math.max(200, Math.ceil((maxDim * 1.5) / 100) * 100));
 
             // Automatic camera fit
             this.fitView();
         }
-
-        // Print debug checkpoint report as required in Section 28
-        console.log(`AquaSim model loaded: "${model.name}"`);
-        console.log(`Nodes:\n  ${model.nodes.size}`);
-        console.log(`Components:\n  Beam: ${model.beams.length}\n  Truss: ${model.trusses.length}\n  Membrane: ${model.membranes.length}`);
-        console.log(`Elements:\n  Beam: ${model.report.beamElementCount}\n  Truss: ${model.report.trussElementCount}\n  Membrane: ${model.report.membraneElementCount}\n  Total: ${model.report.totalElementCount}`);
-        console.log(`Bounding box:\n  X: ${model.boundingBox.min.x.toFixed(3)} -> ${model.boundingBox.max.x.toFixed(3)}\n  Y: ${model.boundingBox.min.y.toFixed(3)} -> ${model.boundingBox.max.y.toFixed(3)}\n  Z: ${model.boundingBox.min.z.toFixed(3)} -> ${model.boundingBox.max.z.toFixed(3)}`);
-        console.log(`Invalid node references:\n  ${model.report.invalidReferences}`);
     }
 
     /**
-     * Automatic camera fit to entire model (including distant seabed mooring lines)
+     * Automatic camera fit to entire model
      */
     public fitView(): void {
         if (!this.currentBounds.isEmpty()) {
@@ -232,7 +420,7 @@ export class AquaSimViewer {
     }
 
     /**
-     * Focus camera specifically on the floating cage structure and nets (radius ~50m)
+     * Focus camera specifically on the floating cage structure and nets
      */
     public fitCageView(): void {
         const cageBounds = new THREE.Box3();
@@ -306,11 +494,17 @@ export class AquaSimViewer {
     }
 
     /**
-     * Set grid visibility
+     * Set master grid visibility
      */
     public setGridVisibility(visible: boolean): void {
-        if (this.gridHelper) {
-            this.gridHelper.visible = visible;
+        if (this.gridHelperXY) {
+            this.gridHelperXY.visible = visible && this.planeVisibility.xy;
+        }
+        if (this.gridHelperXZ) {
+            this.gridHelperXZ.visible = visible && this.planeVisibility.xz;
+        }
+        if (this.gridHelperYZ) {
+            this.gridHelperYZ.visible = visible && this.planeVisibility.yz;
         }
     }
 
