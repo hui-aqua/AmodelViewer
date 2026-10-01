@@ -4,7 +4,7 @@ import { setupFileLoader, loadSampleModel } from '@/ui/fileLoader';
 import { ModelTreeUI } from '@/ui/modelTree';
 import { AquaSimModel } from '@/parser/types';
 
-document.addEventListener('DOMContentLoaded', () => {
+function init() {
     // 1. DOM Elements
     const viewportContainer = document.getElementById('viewport-container') as HTMLElement;
     const fileInput = document.getElementById('file-input') as HTMLInputElement;
@@ -167,4 +167,10 @@ document.addEventListener('DOMContentLoaded', () => {
             footerStatus.textContent = 'Ready (drag & drop .amodel)';
         }
     });
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
