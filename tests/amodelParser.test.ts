@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseAmodelXml } from '../src/parser/amodelParser';
+import { parseAmodelXml } from '@/parser/amodelParser';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -155,7 +155,7 @@ describe('AquaSim Model Parser', () => {
     });
 
     it('should parse real testFile1.amodel accurately', () => {
-        const filePath = path.resolve(__dirname, '../examples/models/testFile1.amodel');
+        const filePath = path.resolve(__dirname, '../public/models/testFile1.amodel');
         const content = fs.readFileSync(filePath, 'utf-8');
 
         const model = parseAmodelXml(content);
@@ -176,5 +176,35 @@ describe('AquaSim Model Parser', () => {
         expect(model.boundingBox.max.y).toBeCloseTo(548.787);
         expect(model.boundingBox.min.z).toBeCloseTo(-190.824);
         expect(model.boundingBox.max.z).toBeCloseTo(0);
+    });
+
+    it('should parse real winch_cage.amodel accurately', () => {
+        const filePath = path.resolve(__dirname, '../public/models/winch_cage.amodel');
+        const content = fs.readFileSync(filePath, 'utf-8');
+
+        const model = parseAmodelXml(content);
+        expect(model.nodes.size).toBeGreaterThan(1000);
+        expect(model.report.totalElementCount).toBeGreaterThan(1000);
+        expect(model.report.invalidReferences).toBe(0);
+    });
+
+    it('should parse real ENC172233860Winch_nearSurface.amodel accurately', () => {
+        const filePath = path.resolve(__dirname, '../public/models/ENC172233860Winch_nearSurface.amodel');
+        const content = fs.readFileSync(filePath, 'utf-8');
+
+        const model = parseAmodelXml(content);
+        expect(model.nodes.size).toBeGreaterThan(1000);
+        expect(model.report.totalElementCount).toBeGreaterThan(1000);
+        expect(model.report.invalidReferences).toBe(0);
+    });
+
+    it('should parse real ENCC100323640.amodel accurately', () => {
+        const filePath = path.resolve(__dirname, '../public/models/ENCC100323640.amodel');
+        const content = fs.readFileSync(filePath, 'utf-8');
+
+        const model = parseAmodelXml(content);
+        expect(model.nodes.size).toBeGreaterThan(500);
+        expect(model.report.totalElementCount).toBeGreaterThan(500);
+        expect(model.report.invalidReferences).toBe(0);
     });
 });

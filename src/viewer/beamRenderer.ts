@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { AquaSimNode, LineElement, StructuralComponent } from '../parser/types';
+import { AquaSimNode, LineElement, StructuralComponent } from '@/parser/types';
 import { aquaSimToThree } from './cameraUtils';
 
 export interface BeamRenderOptions {

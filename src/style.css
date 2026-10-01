@@ -179,6 +179,29 @@ html, body {
     font-weight: 600;
 }
 
+.sample-picker-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.select-sample {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-hover);
+    padding: 5px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    cursor: pointer;
+    outline: none;
+    max-width: 210px;
+}
+
+.select-sample:hover,
+.select-sample:focus {
+    border-color: var(--accent-blue);
+}
+
 .select-mode {
     background-color: var(--bg-tertiary);
     color: var(--text-primary);

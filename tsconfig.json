@@ -13,7 +13,13 @@
     "isolatedModules": true,
     "noEmit": true,
 
-    /* Linting */
+    /* Path aliases */
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    },
+
+    /* Strict type-checking & linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,

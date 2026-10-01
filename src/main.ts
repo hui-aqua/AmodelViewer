@@ -1,8 +1,8 @@
 import './style.css';
-import { AquaSimViewer } from './viewer/AquaSimViewer';
-import { setupFileLoader, loadSampleModel } from './ui/fileLoader';
-import { ModelTreeUI } from './ui/modelTree';
-import { AquaSimModel } from './parser/types';
+import { AquaSimViewer } from '@/viewer/AquaSimViewer';
+import { setupFileLoader, loadSampleModel } from '@/ui/fileLoader';
+import { ModelTreeUI } from '@/ui/modelTree';
+import { AquaSimModel } from '@/parser/types';
 
 document.addEventListener('DOMContentLoaded', () => {
     // 1. DOM Elements
@@ -10,7 +10,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const fileInput = document.getElementById('file-input') as HTMLInputElement;
     const btnOpenFile = document.getElementById('btn-open-file') as HTMLButtonElement;
     const btnLoadSample = document.getElementById('btn-load-sample') as HTMLButtonElement;
+    const selectSampleModel = document.getElementById('select-sample-model') as HTMLSelectElement | null;
     const btnFitView = document.getElementById('btn-fit-view') as HTMLButtonElement;
+    const btnFitCage = document.getElementById('btn-fit-cage') as HTMLButtonElement;
     const btnToggleGrid = document.getElementById('btn-toggle-grid') as HTMLButtonElement;
     const btnToggleAxes = document.getElementById('btn-toggle-axes') as HTMLButtonElement;
 
@@ -93,8 +95,10 @@ document.addEventListener('DOMContentLoaded', () => {
         fileInput.click();
     });
 
-    btnLoadSample.addEventListener('click', () => {
-        loadSampleModel('/testFile1.amodel', 'testFile1.amodel', {
+    function loadActiveSample() {
+        const url = selectSampleModel ? selectSampleModel.value : '/models/testFile1.amodel';
+        const filename = url.split('/').pop() || 'testFile1.amodel';
+        loadSampleModel(url, filename, {
             onLoadStart: (name) => {
                 showLoading(`Loading benchmark sample "${name}"...`);
                 footerFilename.textContent = name;
@@ -103,9 +107,12 @@ document.addEventListener('DOMContentLoaded', () => {
             onLoadSuccess: handleModelLoaded,
             onLoadError: handleModelError
         });
-    });
+    }
 
-    const btnFitCage = document.getElementById('btn-fit-cage') as HTMLButtonElement;
+    btnLoadSample.addEventListener('click', loadActiveSample);
+    if (selectSampleModel) {
+        selectSampleModel.addEventListener('change', loadActiveSample);
+    }
 
     btnFitView.addEventListener('click', () => {
         viewer.fitView();
@@ -116,9 +123,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Section scale slider and render mode
-    const scaleSlider = document.getElementById('scale-slider') as HTMLInputElement;
-    const scaleLabel = document.getElementById('scale-label') as HTMLElement;
-    const selectRenderMode = document.getElementById('select-render-mode') as HTMLSelectElement;
+    const scaleSlider = document.getElementById('scale-slider') as HTMLInputElement | null;
+    const scaleLabel = document.getElementById('scale-label') as HTMLElement | null;
+    const selectRenderMode = document.getElementById('select-render-mode') as HTMLSelectElement | null;
 
     if (scaleSlider && scaleLabel) {
         scaleSlider.addEventListener('input', () => {
@@ -147,7 +154,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Automatically load testFile1.amodel on startup for instant validation
-    loadSampleModel('/testFile1.amodel', 'testFile1.amodel', {
+    loadSampleModel('/models/testFile1.amodel', 'testFile1.amodel', {
         onLoadStart: (name) => {
             showLoading(`Loading benchmark sample "${name}"...`);
             footerFilename.textContent = name;

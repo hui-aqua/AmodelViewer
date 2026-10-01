@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
-import { parseAmodelXml } from '../src/parser/amodelParser';
-import { createBeamGroup, updateBeamScale } from '../src/viewer/beamRenderer';
-import { createTrussGroup, updateTrussScale } from '../src/viewer/trussRenderer';
-import { createMembraneGroup } from '../src/viewer/membraneRenderer';
-import { aquaSimToThree } from '../src/viewer/cameraUtils';
+import { parseAmodelXml } from '@/parser/amodelParser';
+import { createBeamGroup, updateBeamScale } from '@/viewer/beamRenderer';
+import { createTrussGroup, updateTrussScale } from '@/viewer/trussRenderer';
+import { createMembraneGroup } from '@/viewer/membraneRenderer';
+import { aquaSimToThree } from '@/viewer/cameraUtils';
 
 describe('AquaSim 3D Renderers and Geometry', () => {
     it('should preserve AquaSim coordinates in aquaSimToThree without flipping axes', () => {

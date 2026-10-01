@@ -1,5 +1,5 @@
-import { parseAmodelXml } from '../parser/amodelParser';
-import { AquaSimModel } from '../parser/types';
+import { parseAmodelXml } from '@/parser/amodelParser';
+import { AquaSimModel } from '@/parser/types';
 
 export interface FileLoaderCallbacks {
     onLoadStart?: (filename: string) => void;

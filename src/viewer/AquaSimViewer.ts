@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { AquaSimModel } from '../parser/types';
+import { AquaSimModel } from '@/parser/types';
 import { createBeamGroup, updateBeamScale } from './beamRenderer';
 import { createTrussGroup, updateTrussScale } from './trussRenderer';
 import { createMembraneGroup } from './membraneRenderer';

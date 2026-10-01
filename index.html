@@ -35,9 +35,17 @@
                     </svg>
                     Open .amodel
                 </button>
-                <button id="btn-load-sample" class="btn btn-secondary" title="Load the testFile1.amodel benchmark model">
-                    Load Sample (testFile1)
-                </button>
+                <div class="sample-picker-group">
+                    <select id="select-sample-model" class="select-sample" title="Select a benchmark sample model">
+                        <option value="/models/testFile1.amodel">testFile1 (Benchmark Cage & Moorings)</option>
+                        <option value="/models/winch_cage.amodel">winch_cage (Winch Cage System)</option>
+                        <option value="/models/ENC172233860Winch_nearSurface.amodel">ENC172233860 (Near-Surface Winch)</option>
+                        <option value="/models/ENCC100323640.amodel">ENCC100323640 (Cage Configuration)</option>
+                    </select>
+                    <button id="btn-load-sample" class="btn btn-secondary" title="Load selected sample model">
+                        Load Sample
+                    </button>
+                </div>
                 <button id="btn-fit-view" class="btn btn-icon" title="Fit Camera to Entire Model (including Moorings)">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>
