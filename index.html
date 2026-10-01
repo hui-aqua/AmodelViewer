@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AquaSim Web Viewer — Engineering 3D Model Inspection</title>
+    <meta name="description" content="Browser-based 3D structural model viewer for AquaSim .amodel engineering simulation files." />
+    <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+    <div id="app" class="app-layout">
+        <!-- Top Toolbar -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="brand-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="brand-title">AquaSim Web Viewer</h1>
+                    <span class="brand-subtitle">Milestone 1 — Structural Geometry Inspection</span>
+                </div>
+            </div>
+
+            <div class="toolbar-actions">
+                <input type="file" id="file-input" accept=".amodel,.xml" style="display: none;" />
+                <button id="btn-open-file" class="btn btn-primary" title="Open .amodel file from your computer">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                        <polyline points="17 8 12 3 7 8"></polyline>
+                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                    </svg>
+                    Open .amodel
+                </button>
+                <button id="btn-load-sample" class="btn btn-secondary" title="Load the testFile1.amodel benchmark model">
+                    Load Sample (testFile1)
+                </button>
+                <button id="btn-fit-view" class="btn btn-icon" title="Fit Camera to Entire Model (including Moorings)">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>
+                    </svg>
+                    Fit All
+                </button>
+                <button id="btn-fit-cage" class="btn btn-icon" title="Focus Camera on Floating Collar and Net Cage">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="4"></circle>
+                    </svg>
+                    Focus Cage
+                </button>
+                <button id="btn-toggle-grid" class="btn btn-icon btn-active" title="Toggle Sea Surface Grid">
+                    Grid
+                </button>
+                <button id="btn-toggle-axes" class="btn btn-icon btn-active" title="Toggle XYZ Axes Indicator">
+                    Axes
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Body -->
+        <div class="app-body">
+            <!-- Left Sidebar -->
+            <aside class="sidebar">
+                <div class="sidebar-section sidebar-tree-section">
+                    <div class="sidebar-heading">
+                        <span>MODEL HIERARCHY</span>
+                    </div>
+                    <div id="model-tree" class="sidebar-content">
+                        <div class="empty-state">No model loaded. Open or drop an .amodel file to begin.</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section sidebar-stats-section">
+                    <div class="sidebar-heading">
+                        <span>MODEL STATISTICS</span>
+                    </div>
+                    <div id="model-stats" class="sidebar-content">
+                        <div class="stat-placeholder">Statistics will appear once a model is loaded.</div>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- 3D Viewport Area -->
+            <main id="viewport-container" class="viewport-area">
+                <div id="drop-overlay" class="drop-overlay">
+                    <div class="drop-modal">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <p class="drop-title">Drop .amodel file here</p>
+                        <p class="drop-desc">Parsed completely client-side in your browser</p>
+                    </div>
+                </div>
+
+                <!-- Loading Spinner -->
+                <div id="loading-spinner" class="loading-overlay" style="display: none;">
+                    <div class="spinner"></div>
+                    <div id="loading-text" class="loading-text">Parsing AquaSim XML...</div>
+                </div>
+
+                <!-- Coordinate orientation legend in bottom right of viewport -->
+                <div class="coord-legend">
+                    <span class="coord-tag coord-x">X: Lateral</span>
+                    <span class="coord-tag coord-y">Y: Longitudinal</span>
+                    <span class="coord-tag coord-z">Z: Depth / Elevation</span>
+                </div>
+            </main>
+        </div>
+
+        <!-- Footer / Status Bar -->
+        <footer class="app-footer">
+            <span id="footer-filename" class="footer-item">No file loaded</span>
+            <span class="footer-separator">•</span>
+            <span id="footer-status" class="footer-item">Ready</span>
+            <div class="footer-spacer"></div>
+            <span class="footer-note">AquaSim Model Viewer — Engineering Milestone 1</span>
+        </footer>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
