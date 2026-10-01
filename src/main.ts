@@ -96,7 +96,7 @@ function init() {
     });
 
     function loadActiveSample() {
-        const url = selectSampleModel ? selectSampleModel.value : '/models/testFile1.amodel';
+        const url = selectSampleModel ? selectSampleModel.value : './models/testFile1.amodel';
         const filename = url.split('/').pop() || 'testFile1.amodel';
         loadSampleModel(url, filename, {
             onLoadStart: (name) => {
@@ -154,7 +154,7 @@ function init() {
     });
 
     // Automatically load testFile1.amodel on startup for instant validation
-    loadSampleModel('/models/testFile1.amodel', 'testFile1.amodel', {
+    loadSampleModel('./models/testFile1.amodel', 'testFile1.amodel', {
         onLoadStart: (name) => {
             showLoading(`Loading benchmark sample "${name}"...`);
             footerFilename.textContent = name;

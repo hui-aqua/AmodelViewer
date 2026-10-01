@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="2.5" description="This xml file used for Aquasim system" name="New Model" created="11:19:25 10-03-2017" saved="15:26:45 14-05-2025" author="Roy Andre Kihl" lastVersion="2.20.1">
+<model version="2.5" description="This xml file used for Aquasim system" name="New Model" created="11:19:25 10-03-2017" saved="15:26:45 14-05-2025" author="AquaSim Open Data" lastVersion="2.20.1">
   <Nodes>
     <node id="1" x="-548.787" y="-42.5" z="-190.824">
       <dof6 TranslationX="false" TranslationY="false" TranslationZ="false" rotationX="true" rotationY="true" rotationZ="true" />
@@ -25361,7 +25361,7 @@
     </truss>
   </Components>
   <metadata>
-    <previousexport path="E:\winch_simu\step2" />
+    <previousexport path="./exports" />
   </metadata>
   <Environments>
     <EnvironmentLoad name="Normal" type="NORMAL" active="false">

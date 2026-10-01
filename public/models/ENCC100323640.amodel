@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<model version="2.5" description="This xml file used for Aquasim system" name="New Model" created="13:07:23 12-02-2025" saved="13:45:22 10-07-2026" author="TPE Import" lastVersion="2.22.1">
+<model version="2.5" description="This xml file used for Aquasim system" name="New Model" created="13:07:23 12-02-2025" saved="13:45:22 10-07-2026" author="AquaSim Open Data" lastVersion="2.22.1">
   <materials />
   <Nodes>
     <node id="1" x="0.0" y="0.0" z="-40.8">
@@ -19836,7 +19836,7 @@
     </truss>
   </Components>
   <metadata>
-    <previousexport path="C:\Arbeid\Notanalyse\693 ENCC 100 323640 36\04 - SLS\Dynamic" />
+    <previousexport path="./exports" />
   </metadata>
   <Environments>
     <EnvironmentLoad name="SLS" type="DIRECTIONAL" active="true">

@@ -1,8 +1,24 @@
 # AquaSim Web Model Viewer
 
-A lightweight, browser-based 3D engineering viewer for **AquaSim** `.amodel` marine aquaculture simulation files.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-brightgreen)](https://hui-aqua.github.io/AmodelViewer/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.6-blue)](https://www.typescriptlang.org/)
+[![Three.js](https://img.shields.io/badge/Three.js-r170-black)](https://threejs.org/)
+[![Vite](https://img.shields.io/badge/Vite-8.3-646CFF)](https://vitejs.dev/)
 
-Built with **TypeScript**, **Three.js**, and **Vite** without heavy UI frameworks or backend servers. All `.amodel` XML files remain 100% client-side and are parsed directly in the browser.
+A lightweight, high-performance browser-based 3D engineering viewer for **AquaSim** `.amodel` marine aquaculture simulation files.
+
+Built with **TypeScript**, **Three.js**, and **Vite** without heavy UI frameworks or backend servers. All `.amodel` XML files remain **100% private and client-side** in your browser.
+
+---
+
+## 🌐 Instant Online Web App
+
+**No installation required!** You can use the web viewer directly in your web browser:
+
+👉 **[Launch AquaSim Web Viewer on GitHub Pages](https://hui-aqua.github.io/AmodelViewer/)**
+
+Simply drag and drop your `.amodel` file into the browser window or test using the pre-loaded benchmark models.
 
 ---
 
@@ -16,7 +32,7 @@ Built with **TypeScript**, **Three.js**, and **Vite** without heavy UI framework
 
 ## 📖 User Manual
 
-### 1. Starting the Application
+### 1. Running Locally (Alternative)
 1. Ensure [Node.js](https://nodejs.org/) (v18+) is installed.
 2. In the project directory, run:
    ```bash
@@ -100,8 +116,12 @@ Each component entry includes:
 
 ```text
 SimViewer/
+├── .github/
+│   └── workflows/
+│       ├── deploy.yml          # Automated CI/CD deployment to GitHub Pages
+│       └── release.yml         # Automated GitHub Release standalone zip bundler
 ├── public/                     # Static assets served directly
-│   ├── models/                 # Included benchmark .amodel models
+│   ├── models/                 # Sanitized benchmark .amodel simulation models
 │   │   ├── testFile1.amodel
 │   │   ├── winch_cage.amodel
 │   │   ├── ENC172233860Winch_nearSurface.amodel
@@ -129,7 +149,9 @@ SimViewer/
 ├── index.html                  # HTML entry point with semantic layout
 ├── package.json                # Project dependencies, scripts and metadata
 ├── tsconfig.json               # Strict TypeScript config with @/* path aliases
-├── vite.config.ts              # Vite 8 config with vendor chunk splitting
+├── vite.config.ts              # Vite 8 config with relative base & vendor chunking
+├── LICENSE                     # MIT Open Source License
+├── THIRD_PARTY_NOTICES.md      # IP clearance, trademark & third-party notices
 └── .gitignore                  # Git ignore rules for builds, dependencies and IDEs
 ```
 
@@ -164,3 +186,22 @@ Generates an optimized, minified static distribution in `dist/` with vendor chun
 - `assets/three-[hash].js`: Three.js 3D engine chunk (~504 kB)
 - `assets/index-[hash].js`: Application bundle (~25 kB)
 - `assets/index-[hash].css`: Stylesheet (~7.8 kB)
+
+---
+
+## ⚖️ Intellectual Property Clearance & Disclaimers
+
+### Trademark Notice
+**AquaSim®** is a registered trademark of **Aquastructure AS** (Trondheim, Norway).  
+**AquaSim Web Viewer** is an independent, community-developed, open-source 3D visualization tool. It is **not** affiliated with, authorized by, sponsored by, or connected with Aquastructure AS. References to AquaSim and the `.amodel` format are used solely in a descriptive, nominative fair-use capacity to indicate file format compatibility.
+
+### Data Sanitization
+All benchmark simulation models included in `public/models/` have been cleansed of proprietary company names, confidential drive paths, customer references, and personal author identifiers.
+
+For full license texts and third-party notices, please refer to [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
