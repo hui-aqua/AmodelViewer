@@ -51,6 +51,18 @@
                     </svg>
                     Focus Cage
                 </button>
+                <div class="toolbar-divider"></div>
+                <div class="toolbar-control-group" title="Scale beam and truss cross-sections (solid 3D thickness)">
+                    <span class="control-label">Scale:</span>
+                    <input type="range" id="scale-slider" min="0.5" max="20" step="0.5" value="1" class="scale-slider" />
+                    <span id="scale-label" class="scale-badge">1.0x</span>
+                </div>
+                <select id="select-render-mode" class="select-mode" title="Display mode for structural elements">
+                    <option value="both">Solid + Centerline</option>
+                    <option value="solid">Solid 3D Only</option>
+                    <option value="wireframe">Centerline Only</option>
+                </select>
+                <div class="toolbar-divider"></div>
                 <button id="btn-toggle-grid" class="btn btn-icon btn-active" title="Toggle Sea Surface Grid">
                     Grid
                 </button>

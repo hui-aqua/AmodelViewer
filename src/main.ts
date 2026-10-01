@@ -115,6 +115,25 @@ document.addEventListener('DOMContentLoaded', () => {
         viewer.fitCageView();
     });
 
+    // Section scale slider and render mode
+    const scaleSlider = document.getElementById('scale-slider') as HTMLInputElement;
+    const scaleLabel = document.getElementById('scale-label') as HTMLElement;
+    const selectRenderMode = document.getElementById('select-render-mode') as HTMLSelectElement;
+
+    if (scaleSlider && scaleLabel) {
+        scaleSlider.addEventListener('input', () => {
+            const val = parseFloat(scaleSlider.value);
+            scaleLabel.textContent = `${val.toFixed(1)}x`;
+            viewer.setSectionScale(val);
+        });
+    }
+
+    if (selectRenderMode) {
+        selectRenderMode.addEventListener('change', () => {
+            viewer.setRenderMode(selectRenderMode.value as 'solid' | 'wireframe' | 'both');
+        });
+    }
+
     btnToggleGrid.addEventListener('click', () => {
         isGridVisible = !isGridVisible;
         viewer.setGridVisibility(isGridVisible);

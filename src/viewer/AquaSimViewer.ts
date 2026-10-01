@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { AquaSimModel } from '../parser/types';
-import { createBeamGroup } from './beamRenderer';
-import { createTrussGroup } from './trussRenderer';
+import { createBeamGroup, updateBeamScale } from './beamRenderer';
+import { createTrussGroup, updateTrussScale } from './trussRenderer';
 import { createMembraneGroup } from './membraneRenderer';
 import { fitCameraToModel } from './cameraUtils';
 
@@ -23,6 +23,10 @@ export class AquaSimViewer {
     private currentBounds: THREE.Box3 = new THREE.Box3();
     private animFrameId: number | null = null;
     private isDestroyed: boolean = false;
+
+    // Cross-section visual controls
+    private currentScaleFactor: number = 1.0;
+    private renderMode: 'solid' | 'wireframe' | 'both' = 'both';
 
     // Component map for quick visibility toggling: key -> THREE.Object3D
     private componentObjectMap: Map<string, THREE.Object3D> = new Map();
@@ -163,16 +167,22 @@ export class AquaSimViewer {
     public loadModel(model: AquaSimModel): void {
         this.clearModel();
 
-        // 1. Build Beams
-        const beams = createBeamGroup(model.beams, model.nodes);
+        // 1. Build Beams with amodel sections
+        const beams = createBeamGroup(model.beams, model.nodes, {
+            scaleFactor: this.currentScaleFactor,
+            renderMode: this.renderMode
+        });
         beams.children.forEach((obj) => {
             const id = obj.userData.componentId ?? obj.name;
             this.componentObjectMap.set(`beam_${id}`, obj);
             this.beamGroup.add(obj);
         });
 
-        // 2. Build Trusses
-        const trusses = createTrussGroup(model.trusses, model.nodes);
+        // 2. Build Trusses with circular sections
+        const trusses = createTrussGroup(model.trusses, model.nodes, {
+            scaleFactor: this.currentScaleFactor,
+            renderMode: this.renderMode
+        });
         trusses.children.forEach((obj) => {
             const id = obj.userData.componentId ?? obj.name;
             this.componentObjectMap.set(`truss_${id}`, obj);
@@ -264,6 +274,35 @@ export class AquaSimViewer {
         if (obj) {
             obj.visible = visible;
         }
+    }
+
+    /**
+     * Dynamically scale the cross-sections of beam and truss elements
+     */
+    public setSectionScale(scale: number): void {
+        this.currentScaleFactor = scale;
+        updateBeamScale(this.beamGroup, scale);
+        updateTrussScale(this.trussGroup, scale);
+    }
+
+    /**
+     * Switch render mode: solid 3D sections, wireframe centerlines, or both
+     */
+    public setRenderMode(mode: 'solid' | 'wireframe' | 'both'): void {
+        this.renderMode = mode;
+        const updateVisibility = (group: THREE.Group) => {
+            group.children.forEach((compGroup) => {
+                const u = compGroup.userData;
+                if (u.instancedMesh) {
+                    u.instancedMesh.visible = mode !== 'wireframe';
+                }
+                if (u.lineSegments) {
+                    u.lineSegments.visible = mode !== 'solid';
+                }
+            });
+        };
+        updateVisibility(this.beamGroup);
+        updateVisibility(this.trussGroup);
     }
 
     /**

@@ -108,6 +108,117 @@ export function parseAmodelXml(xmlText: string): AquaSimModel {
         return undefined;
     }
 
+    // Helper to extract section geometry for beams and trusses
+    function extractSection(compEl: Element, tagName: 'beam' | 'truss', name: string) {
+        if (tagName === 'truss') {
+            // Truss is always circular per specification
+            let radius = 0.015; // default 15mm radius (30mm dia)
+            const mooringEl = compEl.querySelector('mooring');
+            const loadmodelEl = compEl.querySelector('loadmodel');
+
+            if (mooringEl) {
+                const arealStr = mooringEl.getAttribute('areal');
+                if (arealStr) {
+                    const areal = parseFloat(arealStr);
+                    if (!Number.isNaN(areal) && areal > 0) {
+                        radius = Math.sqrt(areal / Math.PI);
+                    }
+                }
+            } else if (loadmodelEl) {
+                const dragStr = loadmodelEl.getAttribute('dragArealy');
+                if (dragStr) {
+                    const drag = parseFloat(dragStr);
+                    if (!Number.isNaN(drag) && drag > 0) {
+                        radius = drag / 2;
+                    }
+                }
+            }
+
+            // Check if name has explicit mm diameter (e.g. "22 mm")
+            const mmMatch = name.match(/(\d+(?:\.\d+)?)\s*mm/i);
+            if (mmMatch) {
+                const mm = parseFloat(mmMatch[1]);
+                if (!Number.isNaN(mm) && mm > 0) {
+                    radius = (mm / 1000) / 2;
+                }
+            }
+
+            return {
+                shape: 'circular' as const,
+                radius,
+                outerDiameter: radius * 2
+            };
+        }
+
+        // Beam: inspect wizard, crossection, or name
+        let shape: 'circular' | 'ibeam' | 'rectangular' = 'circular';
+        let radius = 0.1;
+        let width = 0.2;
+        let height = 0.2;
+
+        const wizardEl = compEl.querySelector('wizard');
+        const csEl = compEl.querySelector('crossection');
+
+        if (wizardEl) {
+            const wType = wizardEl.getAttribute('type');
+            if (wType === 'circular') {
+                const odStr = wizardEl.getAttribute('outerDiameter');
+                if (odStr) {
+                    const od = parseFloat(odStr);
+                    if (!Number.isNaN(od) && od > 0) {
+                        radius = (od / 1000) / 2;
+                    }
+                }
+                shape = 'circular';
+                width = radius * 2;
+                height = radius * 2;
+            } else if (wType === 'ibeam') {
+                shape = 'ibeam';
+                const tfw = parseFloat(wizardEl.getAttribute('tfw') || '250') / 1000;
+                const wh = parseFloat(wizardEl.getAttribute('wh') || '410') / 1000;
+                const tft = parseFloat(wizardEl.getAttribute('tft') || '20') / 1000;
+                const bft = parseFloat(wizardEl.getAttribute('bft') || '20') / 1000;
+                width = tfw;
+                height = wh + tft + bft;
+                radius = Math.max(width, height) / 2;
+            }
+        } else if (csEl) {
+            const ymin = parseFloat(csEl.getAttribute('neutraldistanceymin') || '0.1');
+            const ymax = parseFloat(csEl.getAttribute('neutraldistanceymax') || '0.1');
+            const zmin = parseFloat(csEl.getAttribute('neutraldistancezmin') || '0.1');
+            const zmax = parseFloat(csEl.getAttribute('neutraldistancezmax') || '0.1');
+
+            width = ymin + ymax;
+            height = zmin + zmax;
+
+            if (Math.abs(width - height) < 1e-4) {
+                shape = 'circular';
+                radius = width / 2;
+            } else {
+                shape = 'rectangular';
+                radius = Math.max(width, height) / 2;
+            }
+        }
+
+        // Secondary check from name (e.g. Ø500)
+        const diaMatch = name.match(/Ø\s*(\d+(?:\.\d+)?)/i);
+        if (diaMatch) {
+            const od = parseFloat(diaMatch[1]);
+            if (!Number.isNaN(od) && od > 0) {
+                radius = (od / 1000) / 2;
+                shape = 'circular';
+            }
+        }
+
+        return {
+            shape,
+            radius,
+            width,
+            height,
+            outerDiameter: radius * 2
+        };
+    }
+
     // Helper to parse line elements (beams and trusses)
     function parseLineComponents(
         tagName: 'beam' | 'truss'
@@ -121,6 +232,7 @@ export function parseAmodelXml(xmlText: string): AquaSimModel {
             const id = idAttr !== null ? parseInt(idAttr, 10) : undefined;
             const metadata = extractAttributes(compEl);
             const color = extractColor(compEl);
+            const section = extractSection(compEl, tagName, nameAttr);
 
             const validElements: LineElement[] = [];
             const elementNodes = compEl.querySelectorAll('element');
@@ -160,6 +272,7 @@ export function parseAmodelXml(xmlText: string): AquaSimModel {
                 name: nameAttr,
                 type: tagName,
                 color,
+                section,
                 elements: validElements,
                 metadata
             });

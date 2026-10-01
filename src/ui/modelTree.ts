@@ -137,6 +137,24 @@ export class ModelTreeUI {
                 item.appendChild(compCheckbox);
                 item.appendChild(swatch);
                 item.appendChild(compLabel);
+
+                if ('section' in comp && comp.section) {
+                    const sec = comp.section;
+                    const secBadge = document.createElement('span');
+                    secBadge.className = 'section-badge';
+                    if (sec.shape === 'circular') {
+                        const d = (sec.outerDiameter ?? (sec.radius ?? 0) * 2) * 1000;
+                        secBadge.textContent = `Ø${Math.round(d)}mm`;
+                        secBadge.title = `Circular section: Diameter ${Math.round(d)} mm`;
+                    } else {
+                        const w = Math.round((sec.width ?? 0.2) * 1000);
+                        const h = Math.round((sec.height ?? 0.2) * 1000);
+                        secBadge.textContent = `${w}×${h}mm`;
+                        secBadge.title = `Profile section: ${w} mm × ${h} mm`;
+                    }
+                    item.appendChild(secBadge);
+                }
+
                 item.appendChild(badge);
                 list.appendChild(item);
 

@@ -28,11 +28,20 @@ export interface ComponentColor {
     b: number;
 }
 
+export interface ElementSection {
+    shape: 'circular' | 'ibeam' | 'rectangular';
+    radius?: number; // in meters
+    width?: number;  // in meters
+    height?: number; // in meters
+    outerDiameter?: number; // in meters
+}
+
 export interface StructuralComponent<T> {
     id?: number;
     name: string;
     type: 'beam' | 'truss' | 'membrane';
     color?: ComponentColor;
+    section?: ElementSection;
     elements: T[];
     metadata?: Record<string, string>;
 }

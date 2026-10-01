@@ -140,6 +140,60 @@ html, body {
     border-color: rgba(56, 189, 248, 0.4);
 }
 
+.toolbar-divider {
+    width: 1px;
+    height: 22px;
+    background-color: var(--border-color);
+    margin: 0 4px;
+}
+
+.toolbar-control-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: rgba(15, 23, 42, 0.5);
+    padding: 3px 8px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+}
+
+.control-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.scale-slider {
+    width: 80px;
+    height: 4px;
+    accent-color: var(--accent-blue);
+    cursor: pointer;
+}
+
+.scale-badge {
+    font-size: 11px;
+    font-family: var(--font-mono);
+    color: var(--accent-cyan);
+    min-width: 32px;
+    text-align: right;
+    font-weight: 600;
+}
+
+.select-mode {
+    background-color: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-hover);
+    padding: 4px 8px;
+    border-radius: 5px;
+    font-size: 11px;
+    cursor: pointer;
+    outline: none;
+}
+
+.select-mode:hover {
+    border-color: var(--accent-blue);
+}
+
 /* Main Body */
 .app-body {
     display: flex;
@@ -270,6 +324,17 @@ html, body {
     padding: 1px 5px;
     border-radius: 10px;
     font-family: var(--font-mono);
+}
+
+.section-badge {
+    font-size: 9px;
+    background-color: rgba(56, 189, 248, 0.12);
+    color: var(--accent-blue);
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    padding: 1px 4px;
+    border-radius: 4px;
+    font-family: var(--font-mono);
+    white-space: nowrap;
 }
 
 /* Stats */
