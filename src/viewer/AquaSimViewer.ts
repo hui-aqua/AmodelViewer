@@ -172,7 +172,7 @@ export class AquaSimViewer {
             scaleFactor: this.currentScaleFactor,
             renderMode: this.renderMode
         });
-        beams.children.forEach((obj) => {
+        [...beams.children].forEach((obj) => {
             const id = obj.userData.componentId ?? obj.name;
             this.componentObjectMap.set(`beam_${id}`, obj);
             this.beamGroup.add(obj);
@@ -183,15 +183,15 @@ export class AquaSimViewer {
             scaleFactor: this.currentScaleFactor,
             renderMode: this.renderMode
         });
-        trusses.children.forEach((obj) => {
+        [...trusses.children].forEach((obj) => {
             const id = obj.userData.componentId ?? obj.name;
             this.componentObjectMap.set(`truss_${id}`, obj);
             this.trussGroup.add(obj);
         });
 
-        // 3. Build Membranes
+        // 3. Build Membranes with all components preserved
         const membranes = createMembraneGroup(model.membranes, model.nodes);
-        membranes.children.forEach((obj) => {
+        [...membranes.children].forEach((obj) => {
             const id = obj.userData.componentId ?? obj.name;
             this.componentObjectMap.set(`membrane_${id}`, obj);
             this.membraneGroup.add(obj);

@@ -117,19 +117,22 @@ describe('AquaSim 3D Renderers and Geometry', () => {
         const membraneGroup = createMembraneGroup(model.membranes, model.nodes);
 
         expect(membraneGroup.children.length).toBe(1);
-        const mesh = membraneGroup.children[0] as THREE.Mesh;
-        expect(mesh).toBeInstanceOf(THREE.Mesh);
-        expect(mesh.userData.aquaSimType).toBe('membrane');
-        expect(mesh.userData.componentName).toBe('NetMesh');
-        expect(mesh.userData.elementCount).toBe(1);
+        const compGroup = membraneGroup.children[0] as THREE.Group;
+        expect(compGroup.userData.aquaSimType).toBe('membrane');
+        expect(compGroup.userData.componentName).toBe('NetMesh');
+        expect(compGroup.userData.elementCount).toBe(1);
+
+        const solidMesh = compGroup.children[0] as THREE.Mesh;
+        expect(solidMesh).toBeInstanceOf(THREE.Mesh);
 
         // 1 quad = 2 triangles = 6 vertices = 18 floats in BufferAttribute
-        const posAttr = mesh.geometry.getAttribute('position');
+        const posAttr = solidMesh.geometry.getAttribute('position');
         expect(posAttr.count).toBe(6);
 
-        // Check material side is DoubleSide
-        const mat = mesh.material as THREE.MeshStandardMaterial;
+        // Check material side is DoubleSide and depthWrite is false
+        const mat = solidMesh.material as THREE.MeshStandardMaterial;
         expect(mat.side).toBe(THREE.DoubleSide);
         expect(mat.transparent).toBe(true);
+        expect(mat.depthWrite).toBe(false);
     });
 });

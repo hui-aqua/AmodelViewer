@@ -70,19 +70,38 @@ export function createMembraneGroup(
             ? new THREE.Color(comp.color.r, comp.color.g, comp.color.b)
             : defaultColor;
 
+        // Solid translucent net surface with depthWrite: false to prevent occlusion of nested nets
         const material = new THREE.MeshStandardMaterial({
             color: compColor,
             side: THREE.DoubleSide,
             transparent: true,
             opacity: opacity,
+            depthWrite: false,
             wireframe: wireframe,
             roughness: 0.6,
             metalness: 0.1
         });
 
         const mesh = new THREE.Mesh(geometry, material);
-        mesh.name = `membrane_${comp.id ?? compIndex}_${comp.name}`;
-        mesh.userData = {
+        mesh.name = `membrane_solid_${comp.id ?? compIndex}`;
+
+        // Wireframe netting overlay to highlight net twine grid
+        const wireMaterial = new THREE.MeshBasicMaterial({
+            color: compColor,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.4,
+            depthWrite: false
+        });
+        const wireMesh = new THREE.Mesh(geometry, wireMaterial);
+        wireMesh.name = `membrane_wire_${comp.id ?? compIndex}`;
+
+        const compGroup = new THREE.Group();
+        compGroup.name = `membrane_${comp.id ?? compIndex}_${comp.name}`;
+        compGroup.add(mesh);
+        compGroup.add(wireMesh);
+
+        compGroup.userData = {
             aquaSimType: 'membrane',
             componentName: comp.name,
             componentId: comp.id ?? compIndex,
@@ -90,7 +109,7 @@ export function createMembraneGroup(
             metadata: comp.metadata
         };
 
-        membraneGroup.add(mesh);
+        membraneGroup.add(compGroup);
     });
 
     return membraneGroup;
