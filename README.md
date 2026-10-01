@@ -47,6 +47,8 @@ You can load an `.amodel` file in three ways:
 ### 4. Toolbar Controls
 - **Fit All:** Centers the camera to enclose the entire model bounding box (including seabed anchors over 1 km away).
 - **Focus Cage:** Zooms the camera directly in on the floating collar and underwater net cone (~50 m span).
+- **Scale Slider:** Real-time scaling of beam and truss 3D cross-sections (from 0.5x to 20x) to clearly inspect slender cables or pipes at any zoom distance.
+- **Display Mode:** Choose between **Solid + Centerline**, **Solid 3D Only**, or **Centerline Only**.
 - **Grid:** Toggles the sea-surface reference grid on/off (positioned at water level $Z = 0$).
 - **Axes:** Toggles the 3D coordinate axes indicator on/off (Red = X, Green = Y, Blue = Z).
 
