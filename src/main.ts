@@ -40,6 +40,20 @@ function init() {
     // 2. Initialize 3D Viewer
     const viewer = new AquaSimViewer(viewportContainer);
 
+    const themeButton = document.getElementById('btn-toggle-theme') as HTMLButtonElement;
+    let theme: 'light' | 'dark' = 'dark';
+    try { theme = localStorage.getItem('amodel-theme') === 'light' ? 'light' : 'dark'; } catch {}
+    const applyTheme = () => {
+        document.documentElement.dataset.theme = theme; viewer.setTheme(theme);
+        themeButton.textContent = theme === 'dark' ? 'Light theme' : 'Dark theme';
+        themeButton.setAttribute('aria-label', 'Switch to ' + (theme === 'dark' ? 'light' : 'dark') + ' theme');
+    };
+    applyTheme();
+    themeButton.addEventListener('click', () => { theme = theme === 'dark' ? 'light' : 'dark'; applyTheme(); try { localStorage.setItem('amodel-theme', theme); } catch {} });
+    const sidebarButton = document.getElementById('btn-toggle-sidebar') as HTMLButtonElement;
+    const sidebar = document.getElementById('model-sidebar') as HTMLElement;
+    sidebarButton.addEventListener('click', () => { sidebar.hidden = !sidebar.hidden; sidebarButton.textContent = sidebar.hidden ? 'Show panel' : 'Hide panel'; sidebarButton.setAttribute('aria-expanded', String(!sidebar.hidden)); });
+
     // 3. Initialize Model Tree UI
     const modelTree = new ModelTreeUI(
         {
@@ -69,10 +83,10 @@ function init() {
         footerStatus.textContent = 'Loaded successfully';
 
         // Load into 3D scene
-        viewer.loadModel(model);
+        const modelId = viewer.loadModel(model);
 
         // Update hierarchy and statistics in UI
-        modelTree.update(model, filename);
+        modelTree.update(model, filename, modelId);
 
         if (window.location.search.includes('focus=cage')) {
             viewer.fitCageView();

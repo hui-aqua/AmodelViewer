@@ -53,7 +53,7 @@ export function setupFileLoader(
     // Input change
     fileInputElement.addEventListener('change', () => {
         if (fileInputElement.files && fileInputElement.files.length > 0) {
-            processFile(fileInputElement.files[0]);
+            Array.from(fileInputElement.files).forEach(processFile);
             fileInputElement.value = ''; // Reset for next selection
         }
     });
@@ -62,7 +62,7 @@ export function setupFileLoader(
     dropZoneElement.addEventListener('dragover', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        dropZoneElement.classList.add('drag-active');
+        document.getElementById('drop-overlay')!.classList.add('drag-active');
     });
 
     dropZoneElement.addEventListener('dragleave', (e) => {
@@ -77,7 +77,7 @@ export function setupFileLoader(
         dropZoneElement.classList.remove('drag-active');
 
         if (e.dataTransfer && e.dataTransfer.files.length > 0) {
-            processFile(e.dataTransfer.files[0]);
+            Array.from(e.dataTransfer.files).forEach(processFile);
         }
     });
 }

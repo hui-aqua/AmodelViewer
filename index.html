@@ -25,7 +25,9 @@
             </div>
 
             <div class="toolbar-actions">
-                <input type="file" id="file-input" accept=".amodel,.xml" style="display: none;" />
+                <button id="btn-toggle-sidebar" class="btn btn-icon" aria-controls="model-sidebar" aria-expanded="true">Hide panel</button>
+                <button id="btn-toggle-theme" class="btn btn-icon">Light theme</button>
+                <input type="file" id="file-input" multiple style="display: none;" />
                 <button id="btn-open-file" class="btn btn-primary" title="Open .amodel file from your computer">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -72,7 +74,7 @@
         <!-- Main Body -->
         <div class="app-body">
             <!-- Left Sidebar -->
-            <aside class="sidebar">
+            <aside id="model-sidebar" class="sidebar">
                 <div class="sidebar-section sidebar-tree-section">
                     <div class="sidebar-heading">
                         <span>MODEL HIERARCHY</span>
@@ -101,7 +103,7 @@
                             <polyline points="17 8 12 3 7 8"></polyline>
                             <line x1="12" y1="3" x2="12" y2="15"></line>
                         </svg>
-                        <p class="drop-title">Drop .amodel file here</p>
+                        <p class="drop-title">Drop .amodel files here</p>
                         <p class="drop-desc">Parsed completely client-side in your browser</p>
                     </div>
                 </div>

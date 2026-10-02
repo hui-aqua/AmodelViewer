@@ -22,6 +22,9 @@ export class AquaSimViewer {
     private trussGroup: THREE.Group;
     private membraneGroup: THREE.Group;
 
+    private models = new Map<string, THREE.Group>();
+    private nextModelId = 1;
+    private gridVisible = true;
     private axesHelper: THREE.AxesHelper;
 
     // XYZ Reference Grid Planes
@@ -181,11 +184,11 @@ export class AquaSimViewer {
     public setPlaneVisibility(plane: 'xy' | 'xz' | 'yz', visible: boolean): void {
         this.planeVisibility[plane] = visible;
         if (plane === 'xy' && this.gridHelperXY) {
-            this.gridHelperXY.visible = visible;
+            this.gridHelperXY.visible = visible && this.gridVisible;
         } else if (plane === 'xz' && this.gridHelperXZ) {
-            this.gridHelperXZ.visible = visible;
+            this.gridHelperXZ.visible = visible && this.gridVisible;
         } else if (plane === 'yz' && this.gridHelperYZ) {
-            this.gridHelperYZ.visible = visible;
+            this.gridHelperYZ.visible = visible && this.gridVisible;
         }
     }
 
@@ -337,31 +340,23 @@ export class AquaSimViewer {
     public clearModel(): void {
         this.componentObjectMap.clear();
 
-        const disposeGroup = (group: THREE.Group) => {
-            while (group.children.length > 0) {
-                const child = group.children[0] as THREE.Mesh | THREE.LineSegments;
-                group.remove(child);
-                if (child.geometry) child.geometry.dispose();
-                if (child.material) {
-                    if (Array.isArray(child.material)) {
-                        child.material.forEach((m) => m.dispose());
-                    } else {
-                        child.material.dispose();
-                    }
-                }
-            }
-        };
-
-        disposeGroup(this.beamGroup);
-        disposeGroup(this.trussGroup);
-        disposeGroup(this.membraneGroup);
+        this.modelGroup.traverse(object => {
+            const mesh = object as THREE.Mesh;
+            mesh.geometry?.dispose();
+            if (mesh.material) (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).forEach(m => m.dispose());
+        });
+        this.modelGroup.clear(); this.models.clear(); this.currentBounds.makeEmpty();
     }
 
     /**
      * Load an AquaSimModel into the 3D scene.
      */
-    public loadModel(model: AquaSimModel): void {
-        this.clearModel();
+    public loadModel(model: AquaSimModel): string {
+        const modelId = 'model-' + this.nextModelId++;
+        const root = new THREE.Group();
+        this.beamGroup = new THREE.Group(); this.trussGroup = new THREE.Group(); this.membraneGroup = new THREE.Group();
+        root.add(this.beamGroup, this.trussGroup, this.membraneGroup);
+        this.models.set(modelId, root);
 
         // 1. Build Beams with amodel sections
         const beams = createBeamGroup(model.beams, model.nodes, {
@@ -370,7 +365,7 @@ export class AquaSimViewer {
         });
         [...beams.children].forEach((obj) => {
             const id = obj.userData.componentId ?? obj.name;
-            this.componentObjectMap.set(`beam_${id}`, obj);
+            this.componentObjectMap.set(`${modelId}:beam_${id}`, obj);
             this.beamGroup.add(obj);
         });
 
@@ -381,7 +376,7 @@ export class AquaSimViewer {
         });
         [...trusses.children].forEach((obj) => {
             const id = obj.userData.componentId ?? obj.name;
-            this.componentObjectMap.set(`truss_${id}`, obj);
+            this.componentObjectMap.set(`${modelId}:truss_${id}`, obj);
             this.trussGroup.add(obj);
         });
 
@@ -389,10 +384,13 @@ export class AquaSimViewer {
         const membranes = createMembraneGroup(model.membranes, model.nodes);
         [...membranes.children].forEach((obj) => {
             const id = obj.userData.componentId ?? obj.name;
-            this.componentObjectMap.set(`membrane_${id}`, obj);
+            this.componentObjectMap.set(`${modelId}:membrane_${id}`, obj);
             this.membraneGroup.add(obj);
         });
 
+        const bounds = new THREE.Box3().setFromObject(root);
+        if (!bounds.isEmpty() && !this.currentBounds.isEmpty()) root.position.x = this.currentBounds.max.x + Math.max(10, (bounds.max.x - bounds.min.x) * 0.15) - bounds.min.x;
+        this.modelGroup.add(root);
         // 4. Compute bounding box
         this.currentBounds.setFromObject(this.modelGroup);
 
@@ -405,10 +403,15 @@ export class AquaSimViewer {
             this.axesHelper.scale.setScalar(Math.max(10, maxDim * 0.15));
             this.setupReferenceGridPlanes(Math.max(200, Math.ceil((maxDim * 1.5) / 100) * 100));
 
+            this.setGridVisibility(this.gridVisible);
             // Automatic camera fit
             this.fitView();
         }
+        return modelId;
     }
+
+    public setModelVisibility(id: string, visible: boolean): void { const root = this.models.get(id); if (root) root.visible = visible; }
+    public setTheme(theme: 'light' | 'dark'): void { this.scene.background = new THREE.Color(theme === 'light' ? 0xf1f5f9 : 0x0f172a); }
 
     /**
      * Automatic camera fit to entire model
@@ -424,12 +427,7 @@ export class AquaSimViewer {
      */
     public fitCageView(): void {
         const cageBounds = new THREE.Box3();
-        if (this.beamGroup.children.length > 0) {
-            cageBounds.expandByObject(this.beamGroup);
-        }
-        if (this.membraneGroup.children.length > 0) {
-            cageBounds.expandByObject(this.membraneGroup);
-        }
+        this.models.forEach(root => { if (root.visible) { cageBounds.expandByObject(root.children[0]); cageBounds.expandByObject(root.children[2]); } });
         if (!cageBounds.isEmpty()) {
             fitCameraToModel(this.camera, this.controls, cageBounds, 1.8);
         } else {
@@ -440,18 +438,9 @@ export class AquaSimViewer {
     /**
      * Category level visibility
      */
-    public setCategoryVisibility(category: 'beam' | 'truss' | 'membrane', visible: boolean): void {
-        switch (category) {
-            case 'beam':
-                this.beamGroup.visible = visible;
-                break;
-            case 'truss':
-                this.trussGroup.visible = visible;
-                break;
-            case 'membrane':
-                this.membraneGroup.visible = visible;
-                break;
-        }
+    public setCategoryVisibility(category: 'beam' | 'truss' | 'membrane', visible: boolean, modelId?: string): void {
+        const index = { beam: 0, truss: 1, membrane: 2 }[category];
+        this.models.forEach((root, id) => { if (!modelId || id === modelId) root.children[index].visible = visible; });
     }
 
     /**
@@ -469,8 +458,7 @@ export class AquaSimViewer {
      */
     public setSectionScale(scale: number): void {
         this.currentScaleFactor = scale;
-        updateBeamScale(this.beamGroup, scale);
-        updateTrussScale(this.trussGroup, scale);
+        this.models.forEach(root => { updateBeamScale(root.children[0] as THREE.Group, scale); updateTrussScale(root.children[1] as THREE.Group, scale); });
     }
 
     /**
@@ -489,14 +477,14 @@ export class AquaSimViewer {
                 }
             });
         };
-        updateVisibility(this.beamGroup);
-        updateVisibility(this.trussGroup);
+        this.models.forEach(root => { updateVisibility(root.children[0] as THREE.Group); updateVisibility(root.children[1] as THREE.Group); });
     }
 
     /**
      * Set master grid visibility
      */
     public setGridVisibility(visible: boolean): void {
+        this.gridVisible = visible;
         if (this.gridHelperXY) {
             this.gridHelperXY.visible = visible && this.planeVisibility.xy;
         }

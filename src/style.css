@@ -646,3 +646,18 @@ html, body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--border-hover);
 }
+
+:root { color-scheme: dark; }
+:root[data-theme="light"] { color-scheme: light; --bg-primary: #f1f5f9; --bg-secondary: #fff; --bg-tertiary: #e2e8f0; --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #64748b; --border-color: #cbd5e1; --border-hover: #94a3b8; --accent-blue: #0369a1; --accent-cyan: #0369a1; --accent-emerald: #047857; }
+[hidden] { display: none !important; }
+.model-header { display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--bg-tertiary); border-radius: 5px; }
+.model-name { flex: 1; min-width: 0; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-primary); font: inherit; font-weight: 600; background: none; border: 0; cursor: pointer; }
+.model-children { padding: 8px 0 0 12px; }
+.tree-model { margin-bottom: 12px; }
+button.expand-icon { background: none; border: 0; padding: 0; }
+:root[data-theme="light"] .tree-category, :root[data-theme="light"] .category-header, :root[data-theme="light"] .sidebar-heading, :root[data-theme="light"] .p-btn { background: var(--bg-primary); border-color: var(--border-color); }
+:root[data-theme="light"] .view-control-box, :root[data-theme="light"] .coord-legend, :root[data-theme="light"] .loading-overlay { background: rgba(255,255,255,.92); }
+.btn-secondary:hover { background: var(--border-hover); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 2px; }
+.app-header { height: auto; min-height: 52px; flex-wrap: wrap; gap: 8px; padding-top: 8px; padding-bottom: 8px; }
+.toolbar-actions { flex-wrap: wrap; }

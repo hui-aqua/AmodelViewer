@@ -16,12 +16,13 @@ export class ModelTreeUI {
         this.viewer = viewer;
     }
 
-    public update(model: AquaSimModel, filename: string): void {
+    public update(model: AquaSimModel, filename: string, modelId: string): void {
         this.renderStats(model, filename);
-        this.renderTree(model);
+        this.renderTree(model, filename, modelId);
         this.elements.statusText.textContent = `${filename} loaded (${model.report.totalElementCount} elements)`;
     }
 
+    private escapeHtml(value: string): string { const span = document.createElement('span'); span.textContent = value; return span.innerHTML.replace(/"/g, '&quot;'); }
     private renderStats(model: AquaSimModel, filename: string): void {
         const { report, boundingBox } = model;
         const bb = boundingBox;
@@ -29,7 +30,7 @@ export class ModelTreeUI {
         this.elements.statsContainer.innerHTML = `
             <div class="stats-group">
                 <div class="stats-title">Model Statistics</div>
-                <div class="stat-row"><span class="stat-label">File:</span><span class="stat-value" title="${filename}">${filename}</span></div>
+                <div class="stat-row"><span class="stat-label">File:</span><span class="stat-value" title="${this.escapeHtml(filename)}">${this.escapeHtml(filename)}</span></div>
                 <div class="stat-row"><span class="stat-label">Nodes:</span><span class="stat-value stat-highlight">${report.nodeCount.toLocaleString()}</span></div>
                 <div class="stat-row"><span class="stat-label">Total Elements:</span><span class="stat-value stat-highlight">${report.totalElementCount.toLocaleString()}</span></div>
                 <div class="stat-row"><span class="stat-label">Beam Comps / Elems:</span><span class="stat-value">${report.beamComponentCount} / ${report.beamElementCount.toLocaleString()}</span></div>
@@ -46,8 +47,20 @@ export class ModelTreeUI {
         `;
     }
 
-    private renderTree(model: AquaSimModel): void {
-        this.elements.treeContainer.innerHTML = '';
+    private renderTree(model: AquaSimModel, filename: string, modelId: string): void {
+        this.elements.treeContainer.querySelector('.empty-state')?.remove();
+        const root = document.createElement('div'); root.className = 'tree-model';
+        const header = document.createElement('div'); header.className = 'model-header';
+        const expand = document.createElement('button'); expand.className = 'expand-icon'; expand.textContent = '?';
+        expand.setAttribute('aria-label', 'Expand or collapse ' + filename); expand.setAttribute('aria-expanded', 'true');
+        const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.checked = true;
+        checkbox.setAttribute('aria-label', 'Show ' + filename);
+        checkbox.addEventListener('change', () => this.viewer.setModelVisibility(modelId, checkbox.checked));
+        const name = document.createElement('button'); name.className = 'model-name'; name.textContent = filename; name.title = 'Show statistics for ' + filename;
+        name.addEventListener('click', () => this.renderStats(model, filename));
+        const children = document.createElement('div'); children.className = 'model-children';
+        expand.addEventListener('click', () => { children.hidden = !children.hidden; expand.textContent = children.hidden ? '?' : '?'; expand.setAttribute('aria-expanded', String(!children.hidden)); });
+        header.append(expand, checkbox, name); root.append(header, children); this.elements.treeContainer.append(root);
 
         const categories = [
             {
@@ -105,7 +118,7 @@ export class ModelTreeUI {
 
             cat.components.forEach((comp, idx) => {
                 const compId = comp.id ?? idx;
-                const compKey = `${cat.type}_${compId}`;
+                const compKey = `${modelId}:${cat.type}_${compId}`;
 
                 const item = document.createElement('div');
                 item.className = 'component-item';
@@ -169,7 +182,7 @@ export class ModelTreeUI {
             });
 
             catElem.appendChild(list);
-            this.elements.treeContainer.appendChild(catElem);
+            children.appendChild(catElem);
 
             // Expand/collapse toggle
             expandBtn.addEventListener('click', () => {
@@ -189,7 +202,7 @@ export class ModelTreeUI {
             catCheckbox.addEventListener('change', () => {
                 catCheckbox.indeterminate = false;
                 const checked = catCheckbox.checked;
-                this.viewer.setCategoryVisibility(cat.type, checked);
+
                 compCheckboxes.forEach((c) => {
                     c.checked = checked;
                     if (c.dataset.key) {
