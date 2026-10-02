@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { AquaSimModel } from '@/parser/types';
-import { createBeamGroup, updateBeamScale } from './beamRenderer';
-import { createTrussGroup, updateTrussScale } from './trussRenderer';
-import { createMembraneGroup } from './membraneRenderer';
+import type { AquaSimModel } from '@/parser/types';
+import { createBeamGroup, updateBeamScale } from './renderers/beamRenderer';
+import { createTrussGroup, updateTrussScale } from './renderers/trussRenderer';
+import { createMembraneGroup } from './renderers/membraneRenderer';
 import { fitCameraToModel } from './cameraUtils';
 
 export class AquaSimViewer {
@@ -33,6 +33,7 @@ export class AquaSimViewer {
 
     private currentBounds: THREE.Box3 = new THREE.Box3();
     private animFrameId: number | null = null;
+    private resizeObserver: ResizeObserver;
     private isDestroyed: boolean = false;
 
     // Cross-section visual controls
@@ -126,8 +127,8 @@ export class AquaSimViewer {
 
         // 8. Event listeners
         window.addEventListener('resize', this.onResize);
-        const resizeObserver = new ResizeObserver(() => this.onResize());
-        resizeObserver.observe(this.container);
+        this.resizeObserver = new ResizeObserver(() => this.onResize());
+        this.resizeObserver.observe(this.container);
 
         // 9. Start render loop
         this.animate();
@@ -338,13 +339,21 @@ export class AquaSimViewer {
      */
     public clearModel(): void {
         this.componentObjectMap.clear();
-
+        const geometries = new Set<THREE.BufferGeometry>();
+        const materials = new Set<THREE.Material>();
         this.modelGroup.traverse(object => {
             const mesh = object as THREE.Mesh;
-            mesh.geometry?.dispose();
-            if (mesh.material) (Array.isArray(mesh.material) ? mesh.material : [mesh.material]).forEach(m => m.dispose());
+            if (mesh.geometry) geometries.add(mesh.geometry);
+            if (mesh.material) {
+                for (const material of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+                    materials.add(material);
+                }
+            }
         });
-        this.modelGroup.clear(); this.currentBounds.makeEmpty();
+        geometries.forEach(geometry => geometry.dispose());
+        materials.forEach(material => material.dispose());
+        this.modelGroup.clear();
+        this.currentBounds.makeEmpty();
     }
 
     /**
@@ -405,7 +414,9 @@ export class AquaSimViewer {
         }
     }
 
-    public setTheme(theme: 'light' | 'dark'): void { this.scene.background = new THREE.Color(theme === 'light' ? 0xf1f5f9 : 0x0f172a); }
+    public setTheme(theme: 'light' | 'dark'): void {
+        this.scene.background = new THREE.Color(theme === 'light' ? 0xf1f5f9 : 0x0f172a);
+    }
 
     /**
      * Automatic camera fit to entire model
@@ -504,7 +515,14 @@ export class AquaSimViewer {
      * Cleanup viewer
      */
     public destroy(): void {
+        if (this.isDestroyed) return;
         this.isDestroyed = true;
+        this.resizeObserver.disconnect();
+        this.controls.dispose();
+        this.axesHelper.dispose();
+        this.gridHelperXY?.dispose();
+        this.gridHelperXZ?.dispose();
+        this.gridHelperYZ?.dispose();
         if (this.animFrameId !== null) {
             cancelAnimationFrame(this.animFrameId);
         }

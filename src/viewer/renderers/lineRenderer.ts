@@ -1,14 +1,14 @@
 import * as THREE from 'three';
-import { AquaSimNode, LineElement, StructuralComponent } from '@/parser/types';
-import { aquaSimToThree } from './cameraUtils';
+import type { AquaSimNode, LineElement, StructuralComponent } from '@/parser/types';
+import { aquaSimToThree } from '../cameraUtils';
 
-export interface BeamRenderOptions {
+export interface LineRenderOptions {
     defaultColor?: number;
     scaleFactor?: number;
     renderMode?: 'solid' | 'wireframe' | 'both';
 }
 
-interface BeamElementTransform {
+interface LineElementTransform {
     mid: THREE.Vector3;
     quat: THREE.Quaternion;
     length: number;
@@ -16,29 +16,32 @@ interface BeamElementTransform {
     baseScaleZ: number;
 }
 
-/**
- * Shared unit geometries to minimize memory usage
- */
-const unitCylinder = new THREE.CylinderGeometry(1, 1, 1, 16);
-const unitBox = new THREE.BoxGeometry(1, 1, 1);
+interface LineStyle {
+    type: 'beam' | 'truss';
+    defaultColor: number;
+    defaultRadius: number;
+    radialSegments: number;
+    roughness: number;
+    metalness: number;
+}
 
-/**
- * Renders Beam structural components using 3D solid cross-sections (InstancedMesh)
- * checked from the AquaSim .amodel file.
- */
-export function createBeamGroup(
-    beams: StructuralComponent<LineElement>[],
+/** Build solid sections and centerlines for beam or truss components. */
+export function createLineGroup(
+    components: StructuralComponent<LineElement>[],
     nodes: Map<number, AquaSimNode>,
-    options: BeamRenderOptions = {}
+    style: LineStyle,
+    options: LineRenderOptions = {}
 ): THREE.Group {
-    const beamGroup = new THREE.Group();
-    beamGroup.name = 'beamGroup';
+    const lineGroup = new THREE.Group();
+    lineGroup.name = `${style.type}Group`;
 
-    const defaultColor = options.defaultColor ?? 0x00d2ff;
+    const defaultColor = options.defaultColor ?? style.defaultColor;
     const scaleFactor = options.scaleFactor ?? 1.0;
     const renderMode = options.renderMode ?? 'both';
+    let boxGeometry: THREE.BoxGeometry | undefined;
+    let cylinderGeometry: THREE.CylinderGeometry | undefined;
 
-    beams.forEach((comp, compIndex) => {
+    components.forEach((comp, compIndex) => {
         if (!comp.elements || comp.elements.length === 0) return;
 
         const compColor = comp.color
@@ -46,17 +49,17 @@ export function createBeamGroup(
             : new THREE.Color(defaultColor);
 
         const compGroup = new THREE.Group();
-        compGroup.name = `beam_comp_${comp.id ?? compIndex}`;
+        compGroup.name = `${style.type}_comp_${comp.id ?? compIndex}`;
 
         // Determine cross-section from amodel
         const section = comp.section;
-        const isRectangular = section?.shape === 'ibeam' || section?.shape === 'rectangular';
-        const baseRadius = section?.radius ?? 0.1;
+        const isRectangular = style.type === 'beam' && (section?.shape === 'ibeam' || section?.shape === 'rectangular');
+        const baseRadius = section?.radius ?? style.defaultRadius;
         const baseWidth = section?.width ?? (baseRadius * 2);
         const baseHeight = section?.height ?? (baseRadius * 2);
 
         // Precompute element transformations
-        const transforms: BeamElementTransform[] = [];
+        const transforms: LineElementTransform[] = [];
         const linePositions: number[] = [];
         const upVector = new THREE.Vector3(0, 1, 0);
 
@@ -94,15 +97,18 @@ export function createBeamGroup(
         if (transforms.length === 0) return;
 
         // 1. Solid 3D Instanced Mesh
-        const geometry = isRectangular ? unitBox : unitCylinder;
+        // Share primitives within this group, without sharing them between viewers.
+        const geometry = isRectangular
+            ? (boxGeometry ??= new THREE.BoxGeometry(1, 1, 1))
+            : (cylinderGeometry ??= new THREE.CylinderGeometry(1, 1, 1, style.radialSegments));
         const solidMaterial = new THREE.MeshStandardMaterial({
             color: compColor,
-            roughness: 0.45,
-            metalness: 0.15
+            roughness: style.roughness,
+            metalness: style.metalness
         });
 
         const instancedMesh = new THREE.InstancedMesh(geometry, solidMaterial, transforms.length);
-        instancedMesh.name = `beam_solid_${comp.id ?? compIndex}`;
+        instancedMesh.name = `${style.type}_solid_${comp.id ?? compIndex}`;
 
         const matrix = new THREE.Matrix4();
         const scaleVec = new THREE.Vector3();
@@ -127,14 +133,14 @@ export function createBeamGroup(
             linewidth: 1
         });
         const lineSegments = new THREE.LineSegments(lineGeom, lineMaterial);
-        lineSegments.name = `beam_line_${comp.id ?? compIndex}`;
+        lineSegments.name = `${style.type}_line_${comp.id ?? compIndex}`;
         lineSegments.visible = renderMode !== 'solid';
 
         compGroup.add(instancedMesh);
         compGroup.add(lineSegments);
 
         compGroup.userData = {
-            aquaSimType: 'beam',
+            aquaSimType: style.type,
             componentName: comp.name,
             componentId: comp.id ?? compIndex,
             elementCount: comp.elements.length,
@@ -145,23 +151,23 @@ export function createBeamGroup(
             metadata: comp.metadata
         };
 
-        beamGroup.add(compGroup);
+        lineGroup.add(compGroup);
     });
 
-    return beamGroup;
+    return lineGroup;
 }
 
 /**
- * Dynamically scale beam cross-sections without recreating geometry
+ * Dynamically scale line cross-sections without recreating geometry
  */
-export function updateBeamScale(beamGroup: THREE.Group, scaleFactor: number): void {
+export function updateLineScale(lineGroup: THREE.Group, scaleFactor: number): void {
     const matrix = new THREE.Matrix4();
     const scaleVec = new THREE.Vector3();
 
-    beamGroup.children.forEach((compGroup) => {
+    lineGroup.children.forEach((compGroup) => {
         const u = compGroup.userData;
         const instancedMesh = u.instancedMesh as THREE.InstancedMesh | undefined;
-        const transforms = u.transforms as BeamElementTransform[] | undefined;
+        const transforms = u.transforms as LineElementTransform[] | undefined;
 
         if (instancedMesh && transforms) {
             transforms.forEach((t, i) => {

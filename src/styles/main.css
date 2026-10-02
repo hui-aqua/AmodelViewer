@@ -411,9 +411,9 @@ html, body {
     z-index: 50;
 }
 
+.drop-overlay.empty-state-visible,
 .drop-overlay.drag-active {
     opacity: 1;
-    pointer-events: auto;
 }
 
 .drop-modal {

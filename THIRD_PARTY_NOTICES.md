@@ -16,7 +16,7 @@ This document details the intellectual property clearance, trademark notices, an
 
 ## 2. Benchmark Datasets & Sample Models
 
-The benchmark simulation models located in `public/models/` (`testFile1.amodel`, `winch_cage.amodel`, `ENC172233860Winch_nearSurface.amodel`, `ENCC100323640.amodel`) have undergone **IP sanitization**:
+The benchmark simulation model retained in `tests/fixtures/ENCC100323640.amodel` has undergone **IP sanitization**:
 - All proprietary client references, commercial project identifiers, internal network/drive paths, and personal author metadata have been removed or replaced with generic open identifiers.
 - The models serve solely as geometric benchmarks for verifying 3D finite-element parsing and rendering accuracy (nodes, beam collars, mooring line catenary curves, and net membrane triangulations).
 

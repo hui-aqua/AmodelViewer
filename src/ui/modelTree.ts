@@ -1,5 +1,5 @@
-import { AquaSimModel } from '@/parser/types';
-import { AquaSimViewer } from '@/viewer/AquaSimViewer';
+import type { AquaSimModel } from '@/parser/types';
+import type { AquaSimViewer } from '@/viewer/AquaSimViewer';
 
 export interface ModelTreeElements {
     treeContainer: HTMLElement;

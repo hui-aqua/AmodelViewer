@@ -155,7 +155,7 @@ describe('AquaSim Model Parser', () => {
     });
 
     it('should parse real ENCC100323640.amodel accurately', () => {
-        const filePath = path.resolve(__dirname, '../public/models/ENCC100323640.amodel');
+        const filePath = path.resolve(__dirname, './fixtures/ENCC100323640.amodel');
         const content = fs.readFileSync(filePath, 'utf-8');
 
         const model = parseAmodelXml(content);

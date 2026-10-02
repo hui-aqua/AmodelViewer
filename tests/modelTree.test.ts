@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { ModelTreeUI } from '@/ui/modelTree';
-import { AquaSimViewer } from '@/viewer/AquaSimViewer';
+import type { AquaSimViewer } from '@/viewer/AquaSimViewer';
 import { parseAmodelXml } from '@/parser/amodelParser';
 
 describe('single-model hierarchy', () => {

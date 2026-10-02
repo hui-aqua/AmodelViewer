@@ -1,12 +1,43 @@
 import { describe, it, expect } from 'vitest';
 import * as THREE from 'three';
 import { parseAmodelXml } from '@/parser/amodelParser';
-import { createBeamGroup, updateBeamScale } from '@/viewer/beamRenderer';
-import { createTrussGroup, updateTrussScale } from '@/viewer/trussRenderer';
-import { createMembraneGroup } from '@/viewer/membraneRenderer';
+import { createBeamGroup, updateBeamScale } from '@/viewer/renderers/beamRenderer';
+import { createTrussGroup, updateTrussScale } from '@/viewer/renderers/trussRenderer';
+import { createMembraneGroup } from '@/viewer/renderers/membraneRenderer';
 import { aquaSimToThree } from '@/viewer/cameraUtils';
 
 describe('AquaSim 3D Renderers and Geometry', () => {
+    it.each([
+        ['beam', createBeamGroup, updateBeamScale],
+        ['truss', createTrussGroup, updateTrussScale]
+    ] as const)('keeps %s geometry independent and scales only cross-sections', (type, create, update) => {
+        const model = parseAmodelXml(`<model><Nodes>
+            <node id="1" x="0" y="0" z="0"/>
+            <node id="2" x="0" y="10" z="0"/>
+            </Nodes><Components><${type} id="7" name="Line">
+            <element id="1" StartNode_ID="1" EndNode_ID="2"/>
+            </${type}></Components></model>`);
+        const components = type === 'beam' ? model.beams : model.trusses;
+        const first = create(components, model.nodes, { renderMode: 'wireframe' });
+        const second = create(components, model.nodes);
+        const mesh = first.children[0].userData.instancedMesh as THREE.InstancedMesh;
+        const other = second.children[0].userData.instancedMesh as THREE.InstancedMesh;
+        expect(mesh.geometry).not.toBe(other.geometry);
+        expect(mesh.visible).toBe(false);
+        expect(first.children[0].userData.lineSegments.visible).toBe(true);
+
+        const matrix = new THREE.Matrix4();
+        mesh.getMatrixAt(0, matrix);
+        const initial = new THREE.Vector3().setFromMatrixScale(matrix);
+        update(first, 3);
+        mesh.getMatrixAt(0, matrix);
+        const scaled = new THREE.Vector3().setFromMatrixScale(matrix);
+        expect(scaled.x).toBeCloseTo(initial.x * 3);
+        expect(scaled.y).toBeCloseTo(10);
+        expect(scaled.z).toBeCloseTo(initial.z * 3);
+        expect(new THREE.Vector3().setFromMatrixPosition(matrix).toArray()).toEqual([0, 5, 0]);
+    });
+
     it('renders mixed triangular and quadrilateral membranes while rejecting missing node references', () => {
         const model = parseAmodelXml(`<model name="MixedMembranes">
             <Nodes>

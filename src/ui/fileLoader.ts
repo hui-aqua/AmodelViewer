@@ -1,5 +1,5 @@
 import { parseAmodelXml } from '@/parser/amodelParser';
-import { AquaSimModel } from '@/parser/types';
+import type { AquaSimModel } from '@/parser/types';
 
 export interface FileLoaderCallbacks {
     onLoadStart?: (filename: string) => void;
@@ -58,48 +58,31 @@ export function setupFileLoader(
         }
     });
 
+    // Keep the overlay passive so entering its children does not interrupt a drag.
+    const dropOverlay = dropZoneElement.querySelector<HTMLElement>('#drop-overlay');
+
     // Drag and Drop
     dropZoneElement.addEventListener('dragover', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        document.getElementById('drop-overlay')!.classList.add('drag-active');
+        dropOverlay?.classList.add('drag-active');
+        if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
     });
 
     dropZoneElement.addEventListener('dragleave', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        dropZoneElement.classList.remove('drag-active');
+        if (e.relatedTarget instanceof Node && dropZoneElement.contains(e.relatedTarget)) return;
+        dropOverlay?.classList.remove('drag-active');
     });
 
     dropZoneElement.addEventListener('drop', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        dropZoneElement.classList.remove('drag-active');
+        dropOverlay?.classList.remove('drag-active');
 
         if (e.dataTransfer && e.dataTransfer.files.length > 0) {
             processFile(e.dataTransfer.files[0]);
         }
     });
-}
-
-/**
- * Helper to fetch a sample model from the public directory.
- */
-export async function loadSampleModel(
-    url: string,
-    filename: string,
-    callbacks: FileLoaderCallbacks
-): Promise<void> {
-    try {
-        if (callbacks.onLoadStart) callbacks.onLoadStart(filename);
-        const response = await fetch(url);
-        if (!response.ok) {
-            throw new Error(`Failed to load ${filename}: HTTP ${response.status}`);
-        }
-        const text = await response.text();
-        const model = parseAmodelXml(text);
-        callbacks.onLoadSuccess(model, filename);
-    } catch (err) {
-        callbacks.onLoadError(err instanceof Error ? err : new Error(String(err)), filename);
-    }
 }
