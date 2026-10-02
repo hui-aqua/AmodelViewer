@@ -52,7 +52,7 @@ function init() {
     themeButton.addEventListener('click', () => { theme = theme === 'dark' ? 'light' : 'dark'; applyTheme(); try { localStorage.setItem('amodel-theme', theme); } catch {} });
     const sidebarButton = document.getElementById('btn-toggle-sidebar') as HTMLButtonElement;
     const sidebar = document.getElementById('model-sidebar') as HTMLElement;
-    sidebarButton.addEventListener('click', () => { sidebar.hidden = !sidebar.hidden; sidebarButton.textContent = sidebar.hidden ? 'Show panel' : 'Hide panel'; sidebarButton.setAttribute('aria-expanded', String(!sidebar.hidden)); });
+    sidebarButton.addEventListener('click', () => { sidebar.hidden = !sidebar.hidden; sidebarButton.classList.toggle('collapsed', sidebar.hidden); sidebarButton.title = sidebar.hidden ? 'Expand model information panel' : 'Collapse model information panel'; sidebarButton.setAttribute('aria-label', sidebarButton.title); sidebarButton.setAttribute('aria-expanded', String(!sidebar.hidden)); });
 
     // 3. Initialize Model Tree UI
     const modelTree = new ModelTreeUI(
@@ -83,10 +83,10 @@ function init() {
         footerStatus.textContent = 'Loaded successfully';
 
         // Load into 3D scene
-        const modelId = viewer.loadModel(model);
+        viewer.loadModel(model);
 
         // Update hierarchy and statistics in UI
-        modelTree.update(model, filename, modelId);
+        modelTree.update(model, filename);
 
         if (window.location.search.includes('focus=cage')) {
             viewer.fitCageView();
@@ -147,16 +147,13 @@ function init() {
 
     // 7. Camera Projection Switcher (Perspective <-> Orthographic)
     function updateCameraButtons(mode: 'perspective' | 'orthographic') {
-        const isPersp = mode === 'perspective';
-        if (btnToggleCamera) {
-            btnToggleCamera.textContent = isPersp ? 'Persp' : 'Ortho';
-            btnToggleCamera.title = isPersp ? 'Switch to Orthographic camera' : 'Switch to Perspective camera';
-        }
-        if (btnBoxCam) {
-            btnBoxCam.textContent = isPersp ? 'PERSP' : 'ORTHO';
-            btnBoxCam.title = isPersp ? 'Perspective projection (click for Ortho)' : 'Orthographic projection (click for Persp)';
+        for (const button of [btnToggleCamera, btnBoxCam]) {
+            if (!button) continue;
+            button.setAttribute('aria-checked', String(mode === 'orthographic'));
+            button.title = mode === 'perspective' ? 'Perspective projection ? switch to Orthographic' : 'Orthographic projection ? switch to Perspective';
         }
     }
+    updateCameraButtons(viewer.getCameraMode());
 
     function handleToggleCamera() {
         const newMode = viewer.toggleCameraMode();

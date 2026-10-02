@@ -16,9 +16,9 @@ export class ModelTreeUI {
         this.viewer = viewer;
     }
 
-    public update(model: AquaSimModel, filename: string, modelId: string): void {
+    public update(model: AquaSimModel, filename: string): void {
         this.renderStats(model, filename);
-        this.renderTree(model, filename, modelId);
+        this.renderTree(model);
         this.elements.statusText.textContent = `${filename} loaded (${model.report.totalElementCount} elements)`;
     }
 
@@ -47,20 +47,8 @@ export class ModelTreeUI {
         `;
     }
 
-    private renderTree(model: AquaSimModel, filename: string, modelId: string): void {
-        this.elements.treeContainer.querySelector('.empty-state')?.remove();
-        const root = document.createElement('div'); root.className = 'tree-model';
-        const header = document.createElement('div'); header.className = 'model-header';
-        const expand = document.createElement('button'); expand.className = 'expand-icon'; expand.textContent = '?';
-        expand.setAttribute('aria-label', 'Expand or collapse ' + filename); expand.setAttribute('aria-expanded', 'true');
-        const checkbox = document.createElement('input'); checkbox.type = 'checkbox'; checkbox.checked = true;
-        checkbox.setAttribute('aria-label', 'Show ' + filename);
-        checkbox.addEventListener('change', () => this.viewer.setModelVisibility(modelId, checkbox.checked));
-        const name = document.createElement('button'); name.className = 'model-name'; name.textContent = filename; name.title = 'Show statistics for ' + filename;
-        name.addEventListener('click', () => this.renderStats(model, filename));
-        const children = document.createElement('div'); children.className = 'model-children';
-        expand.addEventListener('click', () => { children.hidden = !children.hidden; expand.textContent = children.hidden ? '?' : '?'; expand.setAttribute('aria-expanded', String(!children.hidden)); });
-        header.append(expand, checkbox, name); root.append(header, children); this.elements.treeContainer.append(root);
+    private renderTree(model: AquaSimModel): void {
+        this.elements.treeContainer.innerHTML = '';
 
         const categories = [
             {
@@ -118,7 +106,7 @@ export class ModelTreeUI {
 
             cat.components.forEach((comp, idx) => {
                 const compId = comp.id ?? idx;
-                const compKey = `${modelId}:${cat.type}_${compId}`;
+                const compKey = `${cat.type}_${compId}`;
 
                 const item = document.createElement('div');
                 item.className = 'component-item';
@@ -182,7 +170,7 @@ export class ModelTreeUI {
             });
 
             catElem.appendChild(list);
-            children.appendChild(catElem);
+            this.elements.treeContainer.appendChild(catElem);
 
             // Expand/collapse toggle
             expandBtn.addEventListener('click', () => {
