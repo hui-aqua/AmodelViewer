@@ -10,6 +10,7 @@ export interface MembraneRenderOptions {
 
 /**
  * Renders Membrane structural components (nets, flaps, panels).
+ * Three-node elements render as [A, B, C].
  * Each quadrilateral element (A, B, C, D) is split into two triangles:
  *   Triangle 1: [A, B, C]
  *   Triangle 2: [A, C, D]
@@ -37,13 +38,12 @@ export function createMembraneGroup(
             const nA = nodes.get(el.nodeA);
             const nB = nodes.get(el.nodeB);
             const nC = nodes.get(el.nodeC);
-            const nD = nodes.get(el.nodeD);
+            const nD = el.nodeD === undefined ? undefined : nodes.get(el.nodeD);
 
-            if (nA && nB && nC && nD) {
+            if (nA && nB && nC && (el.nodeD === undefined || nD)) {
                 const pA = aquaSimToThree(nA.x, nA.y, nA.z);
                 const pB = aquaSimToThree(nB.x, nB.y, nB.z);
                 const pC = aquaSimToThree(nC.x, nC.y, nC.z);
-                const pD = aquaSimToThree(nD.x, nD.y, nD.z);
 
                 // Triangle 1: A -> B -> C
                 positions.push(pA.x, pA.y, pA.z);
@@ -51,9 +51,12 @@ export function createMembraneGroup(
                 positions.push(pC.x, pC.y, pC.z);
 
                 // Triangle 2: A -> C -> D
-                positions.push(pA.x, pA.y, pA.z);
-                positions.push(pC.x, pC.y, pC.z);
-                positions.push(pD.x, pD.y, pD.z);
+                if (nD) {
+                    const pD = aquaSimToThree(nD.x, nD.y, nD.z);
+                    positions.push(pA.x, pA.y, pA.z);
+                    positions.push(pC.x, pC.y, pC.z);
+                    positions.push(pD.x, pD.y, pD.z);
+                }
             }
         }
 

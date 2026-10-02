@@ -62,12 +62,21 @@ html, body {
 .brand-icon {
     width: 32px;
     height: 32px;
-    background: linear-gradient(135deg, #0284c7, #38bdf8);
+    background: white;
     border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.brand-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
 }
 
 .brand-title {
@@ -491,24 +500,6 @@ html, body {
     color: var(--text-muted);
 }
 
-.cam-badge {
-    font-size: 9px;
-    font-family: var(--font-mono);
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 4px;
-    background-color: rgba(56, 189, 248, 0.15);
-    color: var(--accent-blue);
-    border: 1px solid rgba(56, 189, 248, 0.3);
-    cursor: pointer;
-    transition: all 0.15s ease;
-}
-
-.cam-badge:hover {
-    background-color: var(--accent-blue);
-    color: #0f172a;
-}
-
 .view-box-row {
     display: flex;
     align-items: center;
@@ -540,69 +531,6 @@ html, body {
 .v-btn-z:hover { border-color: #38bdf8; color: #38bdf8; }
 .v-btn-iso:hover { border-color: #ffaa00; color: #ffaa00; }
 
-.planes-row {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-}
-
-.plane-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: var(--text-muted);
-    min-width: 38px;
-}
-
-.p-btn {
-    flex: 1;
-    padding: 3px 6px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-family: var(--font-mono);
-    font-weight: 600;
-    border: 1px solid var(--border-color);
-    background-color: rgba(30, 41, 59, 0.6);
-    color: var(--text-muted);
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.15s ease;
-}
-
-.p-btn:hover {
-    border-color: var(--border-hover);
-    color: var(--text-primary);
-}
-
-.p-btn.active {
-    background-color: rgba(56, 189, 248, 0.2);
-    border-color: var(--accent-blue);
-    color: var(--accent-blue);
-}
-
-/* Coord Legend */
-.coord-legend {
-    position: absolute;
-    bottom: 12px;
-    right: 12px;
-    display: flex;
-    gap: 8px;
-    background-color: rgba(15, 23, 42, 0.85);
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid var(--border-color);
-    pointer-events: none;
-}
-
-.coord-tag {
-    font-size: 11px;
-    font-family: var(--font-mono);
-    font-weight: 600;
-}
-
-.coord-x { color: #f43f5e; }
-.coord-y { color: #10b981; }
-.coord-z { color: #38bdf8; }
-
 /* Custom Scrollbars */
 ::-webkit-scrollbar {
     width: 6px;
@@ -626,7 +554,7 @@ html, body {
 :root[data-theme="light"] { color-scheme: light; --bg-primary: #f1f5f9; --bg-secondary: #fff; --bg-tertiary: #e2e8f0; --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #64748b; --border-color: #cbd5e1; --border-hover: #94a3b8; --accent-blue: #0369a1; --accent-cyan: #0369a1; --accent-emerald: #047857; }
 [hidden] { display: none !important; }
 :root[data-theme="light"] .tree-category, :root[data-theme="light"] .category-header, :root[data-theme="light"] .sidebar-heading, :root[data-theme="light"] .p-btn { background: var(--bg-primary); border-color: var(--border-color); }
-:root[data-theme="light"] .view-control-box, :root[data-theme="light"] .coord-legend, :root[data-theme="light"] .loading-overlay { background: rgba(255,255,255,.92); }
+:root[data-theme="light"] .view-control-box, :root[data-theme="light"] .loading-overlay { background: rgba(255,255,255,.92); }
 .btn-secondary:hover { background: var(--border-hover); }
 button:focus-visible, input:focus-visible { outline: 2px solid var(--accent-blue); outline-offset: 2px; }
 .app-header { height: auto; min-height: 52px; flex-wrap: wrap; gap: 8px; padding-top: 8px; padding-bottom: 8px; }
@@ -643,7 +571,6 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent-blue
 .projection-switch[aria-checked="true"] .switch-thumb { transform: translateX(13px); }
 .projection-switch[aria-checked="false"] .projection-perspective, .projection-switch[aria-checked="true"] .projection-orthographic { color: var(--accent-blue); }
 .projection-switch:hover { border-color: var(--accent-blue); }
-.projection-switch-small { padding: 4px 6px; min-height: 30px; gap: 4px; }
 @media (max-width: 600px) { .sidebar { width: min(280px, 70vw); min-width: 0; } .sidebar-stats-section { height: 340px; max-height: 60%; min-height: 100px; } }
 @media (prefers-reduced-motion: reduce) { .switch-thumb { transition: none; } }
 

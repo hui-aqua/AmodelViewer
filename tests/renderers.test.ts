@@ -7,6 +7,43 @@ import { createMembraneGroup } from '@/viewer/membraneRenderer';
 import { aquaSimToThree } from '@/viewer/cameraUtils';
 
 describe('AquaSim 3D Renderers and Geometry', () => {
+    it('renders mixed triangular and quadrilateral membranes while rejecting missing node references', () => {
+        const model = parseAmodelXml(`<model name="MixedMembranes">
+            <Nodes>
+                <node id="1" x="0" y="0" z="0"/>
+                <node id="2" x="10" y="0" z="0"/>
+                <node id="3" x="10" y="10" z="0"/>
+                <node id="4" x="0" y="10" z="0"/>
+            </Nodes>
+            <Components><membrane id="1" name="Mixed">
+                <element id="1" nodeA="1" nodeB="2" nodeC="3"/>
+                <element id="2" nodeA="1" nodeB="2" nodeC="3" nodeD="4"/>
+                <element id="3" nodeA="1" nodeB="2" nodeC="999"/>
+                <element id="4" nodeA="1" nodeB="2" nodeC="3" nodeD="999"/>
+            </membrane></Components>
+        </model>`);
+
+        expect(model.membranes[0].elements).toHaveLength(2);
+        expect(model.membranes[0].elements[0].nodeD).toBeUndefined();
+        expect(model.report.invalidReferences).toBe(2);
+        expect(model.report.totalElementCount).toBe(2);
+
+        const group = createMembraneGroup(model.membranes, model.nodes);
+        const component = group.children[0] as THREE.Group;
+        const solid = component.children[0] as THREE.Mesh;
+        const wire = component.children[1] as THREE.Mesh;
+        expect(wire.geometry).toBe(solid.geometry);
+        expect(solid.geometry.getAttribute('position').count).toBe(9);
+        expect(Array.from(solid.geometry.getAttribute('position').array).slice(0, 9))
+            .toEqual([0, 0, 0, 10, 0, 0, 10, 10, 0]);
+        const normals = solid.geometry.getAttribute('normal');
+        for (let i = 0; i < normals.count; i++) {
+            expect(normals.getX(i)).toBeCloseTo(0);
+            expect(normals.getY(i)).toBeCloseTo(0);
+            expect(normals.getZ(i)).toBeCloseTo(1);
+        }
+    });
+
     it('should preserve AquaSim coordinates in aquaSimToThree without flipping axes', () => {
         const v = aquaSimToThree(12.5, -34.2, 56.7);
         expect(v.x).toBe(12.5);

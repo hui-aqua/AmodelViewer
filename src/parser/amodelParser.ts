@@ -303,17 +303,17 @@ export function parseAmodelXml(xmlText: string): AquaSimModel {
                 const nodeCStr = elemEl.getAttribute('nodeC');
                 const nodeDStr = elemEl.getAttribute('nodeD');
 
-                if (elemIdStr && nodeAStr && nodeBStr && nodeCStr && nodeDStr) {
+                if (elemIdStr && nodeAStr && nodeBStr && nodeCStr) {
                     const elemId = parseInt(elemIdStr, 10);
                     const nodeA = parseInt(nodeAStr, 10);
                     const nodeB = parseInt(nodeBStr, 10);
                     const nodeC = parseInt(nodeCStr, 10);
-                    const nodeD = parseInt(nodeDStr, 10);
+                    const nodeD = nodeDStr === null ? undefined : parseInt(nodeDStr, 10);
 
                     const hasA = nodes.has(nodeA);
                     const hasB = nodes.has(nodeB);
                     const hasC = nodes.has(nodeC);
-                    const hasD = nodes.has(nodeD);
+                    const hasD = nodeD === undefined || nodes.has(nodeD);
 
                     if (!hasA || !hasB || !hasC || !hasD) {
                         invalidReferences++;

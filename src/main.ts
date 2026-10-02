@@ -12,7 +12,6 @@ function init() {
     const btnFitView = document.getElementById('btn-fit-view') as HTMLButtonElement;
     const btnFitCage = document.getElementById('btn-fit-cage') as HTMLButtonElement;
     const btnToggleCamera = document.getElementById('btn-toggle-camera') as HTMLButtonElement | null;
-    const btnBoxCam = document.getElementById('btn-box-cam') as HTMLButtonElement | null;
     const selectRenderMode = document.getElementById('select-render-mode') as HTMLSelectElement | null;
     const btnToggleGrid = document.getElementById('btn-toggle-grid') as HTMLButtonElement;
     const btnToggleAxes = document.getElementById('btn-toggle-axes') as HTMLButtonElement;
@@ -22,11 +21,6 @@ function init() {
     const btnViewY = document.getElementById('btn-view-y') as HTMLButtonElement | null;
     const btnViewZ = document.getElementById('btn-view-z') as HTMLButtonElement | null;
     const btnViewIso = document.getElementById('btn-view-iso') as HTMLButtonElement | null;
-
-    // Plane Grid Buttons
-    const btnPlaneXY = document.getElementById('btn-plane-xy') as HTMLButtonElement | null;
-    const btnPlaneXZ = document.getElementById('btn-plane-xz') as HTMLButtonElement | null;
-    const btnPlaneYZ = document.getElementById('btn-plane-yz') as HTMLButtonElement | null;
 
     const treeContainer = document.getElementById('model-tree') as HTMLElement;
     const statsContainer = document.getElementById('model-stats') as HTMLElement;
@@ -69,8 +63,8 @@ function init() {
     );
 
     // 4. State tracking
-    let isGridVisible = true;
-    let isAxesVisible = true;
+    let isGridVisible = false;
+    let isAxesVisible = false;
 
     function showLoading(msg: string) {
         loadingText.textContent = msg;
@@ -133,7 +127,7 @@ function init() {
 
     // 7. Camera Projection Switcher (Perspective <-> Orthographic)
     function updateCameraButtons(mode: 'perspective' | 'orthographic') {
-        for (const button of [btnToggleCamera, btnBoxCam]) {
+        for (const button of [btnToggleCamera]) {
             if (!button) continue;
             button.setAttribute('aria-checked', String(mode === 'orthographic'));
             button.title = mode === 'perspective' ? 'Perspective projection ? switch to Orthographic' : 'Orthographic projection ? switch to Perspective';
@@ -149,10 +143,6 @@ function init() {
     if (btnToggleCamera) {
         btnToggleCamera.addEventListener('click', handleToggleCamera);
     }
-    if (btnBoxCam) {
-        btnBoxCam.addEventListener('click', handleToggleCamera);
-    }
-
     // 8. Quick View Alignment Buttons (X+, Y+, Z+, Iso)
     if (btnViewX) {
         btnViewX.addEventListener('click', () => viewer.alignView('x+'));
@@ -167,29 +157,6 @@ function init() {
         btnViewIso.addEventListener('click', () => viewer.alignView('iso'));
     }
 
-    // 9. Reference Grid Plane Toggles (XY, XZ, YZ)
-    if (btnPlaneXY) {
-        btnPlaneXY.addEventListener('click', () => {
-            const next = !viewer.getPlaneVisibility('xy');
-            viewer.setPlaneVisibility('xy', next);
-            btnPlaneXY.classList.toggle('active', next);
-        });
-    }
-    if (btnPlaneXZ) {
-        btnPlaneXZ.addEventListener('click', () => {
-            const next = !viewer.getPlaneVisibility('xz');
-            viewer.setPlaneVisibility('xz', next);
-            btnPlaneXZ.classList.toggle('active', next);
-        });
-    }
-    if (btnPlaneYZ) {
-        btnPlaneYZ.addEventListener('click', () => {
-            const next = !viewer.getPlaneVisibility('yz');
-            viewer.setPlaneVisibility('yz', next);
-            btnPlaneYZ.classList.toggle('active', next);
-        });
-    }
-
     // Render Mode (Solid / Wireframe / Both)
     if (selectRenderMode) {
         selectRenderMode.addEventListener('change', () => {
@@ -202,12 +169,14 @@ function init() {
         isGridVisible = !isGridVisible;
         viewer.setGridVisibility(isGridVisible);
         btnToggleGrid.classList.toggle('btn-active', isGridVisible);
+        btnToggleGrid.setAttribute('aria-pressed', String(isGridVisible));
     });
 
     btnToggleAxes.addEventListener('click', () => {
         isAxesVisible = !isAxesVisible;
         viewer.setAxesVisibility(isAxesVisible);
         btnToggleAxes.classList.toggle('btn-active', isAxesVisible);
+        btnToggleAxes.setAttribute('aria-pressed', String(isAxesVisible));
     });
 
     // 10. Automatically load ENCC100323640.amodel on startup

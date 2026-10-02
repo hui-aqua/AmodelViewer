@@ -22,7 +22,7 @@ export class AquaSimViewer {
     private trussGroup: THREE.Group;
     private membraneGroup: THREE.Group;
 
-    private gridVisible = true;
+    private gridVisible = false;
     private axesHelper: THREE.AxesHelper;
 
     // XYZ Reference Grid Planes
@@ -101,6 +101,7 @@ export class AquaSimViewer {
 
         // 6. Helpers
         this.axesHelper = new THREE.AxesHelper(50);
+        this.axesHelper.visible = false;
         this.axesHelper.renderOrder = 999;
         this.scene.add(this.axesHelper);
 
@@ -159,20 +160,20 @@ export class AquaSimViewer {
         this.gridHelperXY = new THREE.GridHelper(size, divisions, 0x38bdf8, 0x1e293b);
         this.gridHelperXY.rotation.x = Math.PI / 2;
         this.gridHelperXY.position.set(0, 0, 0);
-        this.gridHelperXY.visible = this.planeVisibility.xy;
+        this.gridHelperXY.visible = this.planeVisibility.xy && this.gridVisible;
         this.scene.add(this.gridHelperXY);
 
         // 2. XZ Grid (Lateral Cross-section at Y=0): Emerald/Slate
         this.gridHelperXZ = new THREE.GridHelper(size, divisions, 0x10b981, 0x1e293b);
         this.gridHelperXZ.position.set(0, 0, 0);
-        this.gridHelperXZ.visible = this.planeVisibility.xz;
+        this.gridHelperXZ.visible = this.planeVisibility.xz && this.gridVisible;
         this.scene.add(this.gridHelperXZ);
 
         // 3. YZ Grid (Longitudinal Cross-section at X=0): Rose/Slate
         this.gridHelperYZ = new THREE.GridHelper(size, divisions, 0xf43f5e, 0x1e293b);
         this.gridHelperYZ.rotation.z = Math.PI / 2;
         this.gridHelperYZ.position.set(0, 0, 0);
-        this.gridHelperYZ.visible = this.planeVisibility.yz;
+        this.gridHelperYZ.visible = this.planeVisibility.yz && this.gridVisible;
         this.scene.add(this.gridHelperYZ);
     }
 

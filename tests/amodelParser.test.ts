@@ -163,7 +163,9 @@ describe('AquaSim Model Parser', () => {
         expect(model.beams.length).toBe(3);
         expect(model.trusses.length).toBe(11);
         expect(model.membranes.length).toBe(2);
-        expect(model.report.totalElementCount).toBe(4948);
+        expect(model.report.totalElementCount).toBe(5020);
+        expect(model.membranes.flatMap(component => component.elements)
+            .filter(element => element.nodeD === undefined)).toHaveLength(72);
         expect(model.report.invalidReferences).toBe(0);
 
         // Bounding box checks (35m radius circular cage, 40.8m depth)

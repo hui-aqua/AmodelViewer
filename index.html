@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="./branding/akva-group-icon.png" />
+    <link rel="apple-touch-icon" href="./branding/akva-group-icon.png" />
     <title>AquaSim Web Viewer — Engineering 3D Model Inspection</title>
     <meta name="description" content="Browser-based 3D structural model viewer for AquaSim .amodel engineering simulation files." />
 </head>
@@ -12,15 +14,10 @@
         <header class="app-header">
             <div class="brand">
                 <div class="brand-icon">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                        <polyline points="2 17 12 22 22 17"></polyline>
-                        <polyline points="2 12 12 17 22 12"></polyline>
-                    </svg>
+                    <img src="./branding/akva-group-icon.png" alt="AKVA group logo" />
                 </div>
                 <div>
                     <h1 class="brand-title">AquaSim Web Viewer</h1>
-                    <span class="brand-subtitle">Milestone 1 — Structural Geometry Inspection</span>
                 </div>
             </div>
 
@@ -54,11 +51,11 @@
                     <option value="wireframe">Centerline Only</option>
                 </select>
                 <div class="toolbar-divider"></div>
-                <button id="btn-toggle-grid" class="btn btn-icon btn-active" title="Toggle Sea Surface Grid">
-                    Grid
+                <button id="btn-toggle-grid" class="btn btn-icon" title="Toggle Sea Surface Grid" aria-label="Sea surface grid" aria-pressed="false">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg>
                 </button>
-                <button id="btn-toggle-axes" class="btn btn-icon btn-active" title="Toggle XYZ Axes Indicator">
-                    Axes
+                <button id="btn-toggle-axes" class="btn btn-icon" title="Toggle XYZ Axes Indicator" aria-label="XYZ axes indicator" aria-pressed="false">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 15V3m0 12h12M9 15l-6 6M6 6l3-3 3 3M18 12l3 3-3 3M3 17v4h4"/></svg>
                 </button>
             </div>
         </header>
@@ -110,11 +107,10 @@
                     <div id="loading-text" class="loading-text">Parsing AquaSim XML...</div>
                 </div>
 
-                <!-- Floating View & Plane Orientation Control Box -->
+                <!-- Floating View Orientation Control Box -->
                 <div id="view-control-box" class="view-control-box">
                     <div class="view-box-header">
-                        <span class="view-box-title">VIEW / PLANES</span>
-                        <button id="btn-box-cam" class="projection-switch projection-switch-small" role="switch" aria-checked="false" aria-label="Orthographic projection" title="Perspective projection ? switch to Orthographic"><span class="projection-option projection-perspective"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M5 5 19 8v8L5 19zM5 5v14M12 6.5v11M5 12h14"/></svg></span><span class="switch-track"><span class="switch-thumb"></span></span><span class="projection-option projection-orthographic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M4 12h16M12 4v16"/></svg></span></button>
+                        <span class="view-box-title">VIEW</span>
                     </div>
                     <div class="view-box-row">
                         <button id="btn-view-x" class="v-btn v-btn-x" title="Front Elevation View (X+)">X+</button>
@@ -122,20 +118,8 @@
                         <button id="btn-view-z" class="v-btn v-btn-z" title="Top Plan View (Z+)">Z+</button>
                         <button id="btn-view-iso" class="v-btn v-btn-iso" title="Reset to Isometric 3D View">3D</button>
                     </div>
-                    <div class="view-box-row planes-row">
-                        <span class="plane-label">Planes:</span>
-                        <button id="btn-plane-xy" class="p-btn active" title="Toggle Sea Surface (XY Plane at Z=0)">XY</button>
-                        <button id="btn-plane-xz" class="p-btn" title="Toggle Lateral Cross-Section (XZ Plane at Y=0)">XZ</button>
-                        <button id="btn-plane-yz" class="p-btn" title="Toggle Longitudinal Cross-Section (YZ Plane at X=0)">YZ</button>
-                    </div>
                 </div>
 
-                <!-- Coordinate orientation legend in bottom right of viewport -->
-                <div class="coord-legend">
-                    <span class="coord-tag coord-x">X: Lateral</span>
-                    <span class="coord-tag coord-y">Y: Longitudinal</span>
-                    <span class="coord-tag coord-z">Z: Depth / Elevation</span>
-                </div>
             </main>
         </div>
     </div>

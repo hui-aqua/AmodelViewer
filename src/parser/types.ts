@@ -18,7 +18,7 @@ export interface MembraneElement {
     nodeA: number;
     nodeB: number;
     nodeC: number;
-    nodeD: number;
+    nodeD?: number;
     metadata?: Record<string, string>;
 }
 
