@@ -8,7 +8,7 @@ describe('single-model hierarchy', () => {
         const viewer = { setComponentVisibility: vi.fn() };
         const treeContainer = document.createElement('div');
         const statsContainer = document.createElement('div');
-        const ui = new ModelTreeUI({ treeContainer, statsContainer, statusText: document.createElement('div') }, viewer as unknown as AquaSimViewer);
+        const ui = new ModelTreeUI({ treeContainer, statsContainer }, viewer as unknown as AquaSimViewer);
         const makeModel = (name: string) => parseAmodelXml(`<model><Nodes><node id="1" x="0" y="0" z="0"/><node id="2" x="10" y="0" z="0"/></Nodes><Components><beam id="1" name="${name}"><elements><element id="1" StartNode_ID="1" EndNode_ID="2"/></elements></beam></Components></model>`);
         ui.update(makeModel('First beam'), 'first.amodel');
         ui.update(makeModel('Second beam'), 'second.amodel');

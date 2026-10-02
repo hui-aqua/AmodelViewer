@@ -33,8 +33,6 @@ function init() {
     const loadingSpinner = document.getElementById('loading-spinner') as HTMLElement;
     const loadingText = document.getElementById('loading-text') as HTMLElement;
 
-    const footerFilename = document.getElementById('footer-filename') as HTMLElement;
-    const footerStatus = document.getElementById('footer-status') as HTMLElement;
 
     // 2. Initialize 3D Viewer
     const viewer = new AquaSimViewer(viewportContainer);
@@ -51,14 +49,21 @@ function init() {
     themeButton.addEventListener('click', () => { theme = theme === 'dark' ? 'light' : 'dark'; applyTheme(); try { localStorage.setItem('amodel-theme', theme); } catch {} });
     const sidebarButton = document.getElementById('btn-toggle-sidebar') as HTMLButtonElement;
     const sidebar = document.getElementById('model-sidebar') as HTMLElement;
-    sidebarButton.addEventListener('click', () => { sidebar.hidden = !sidebar.hidden; sidebarButton.classList.toggle('collapsed', sidebar.hidden); sidebarButton.title = sidebar.hidden ? 'Expand model information panel' : 'Collapse model information panel'; sidebarButton.setAttribute('aria-label', sidebarButton.title); sidebarButton.setAttribute('aria-expanded', String(!sidebar.hidden)); });
+    function setSidebarCollapsed(collapsed: boolean) {
+        sidebar.hidden = collapsed;
+        sidebarButton.classList.toggle('collapsed', collapsed);
+        sidebarButton.title = collapsed ? 'Show model components' : 'Hide model components';
+        sidebarButton.setAttribute('aria-label', sidebarButton.title);
+        sidebarButton.setAttribute('aria-expanded', String(!collapsed));
+    }
+    setSidebarCollapsed(window.matchMedia('(max-width: 600px)').matches);
+    sidebarButton.addEventListener('click', () => setSidebarCollapsed(!sidebar.hidden));
 
     // 3. Initialize Model Tree UI
     const modelTree = new ModelTreeUI(
         {
             treeContainer,
-            statsContainer,
-            statusText: footerStatus
+            statsContainer
         },
         viewer
     );
@@ -78,8 +83,6 @@ function init() {
 
     function handleModelLoaded(model: AquaSimModel, filename: string) {
         hideLoading();
-        footerFilename.textContent = filename;
-        footerStatus.textContent = 'Loaded successfully';
 
         // Load into 3D scene
         viewer.loadModel(model);
@@ -99,8 +102,6 @@ function init() {
 
     function handleModelError(error: Error, filename: string) {
         hideLoading();
-        footerFilename.textContent = filename;
-        footerStatus.textContent = `Error: ${error.message}`;
         alert(`Failed to load model "${filename}":\n\n${error.message}`);
         console.error(error);
     }
@@ -109,8 +110,6 @@ function init() {
     setupFileLoader(fileInput, viewportContainer, {
         onLoadStart: (filename) => {
             showLoading(`Parsing "${filename}"...`);
-            footerFilename.textContent = filename;
-            footerStatus.textContent = 'Parsing...';
         },
         onLoadSuccess: handleModelLoaded,
         onLoadError: handleModelError
@@ -215,14 +214,11 @@ function init() {
     loadSampleModel(sampleUrl, sampleName, {
         onLoadStart: (name) => {
             showLoading(`Loading benchmark sample "${name}"...`);
-            footerFilename.textContent = name;
-            footerStatus.textContent = 'Initializing...';
         },
         onLoadSuccess: handleModelLoaded,
         onLoadError: (err) => {
             hideLoading();
             console.log('Sample model not auto-loaded:', err.message);
-            footerStatus.textContent = 'Ready (drag & drop .amodel)';
         }
     });
 }

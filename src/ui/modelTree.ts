@@ -4,7 +4,6 @@ import { AquaSimViewer } from '@/viewer/AquaSimViewer';
 export interface ModelTreeElements {
     treeContainer: HTMLElement;
     statsContainer: HTMLElement;
-    statusText: HTMLElement;
 }
 
 export class ModelTreeUI {
@@ -19,7 +18,6 @@ export class ModelTreeUI {
     public update(model: AquaSimModel, filename: string): void {
         this.renderStats(model, filename);
         this.renderTree(model);
-        this.elements.statusText.textContent = `${filename} loaded (${model.report.totalElementCount} elements)`;
     }
 
     private escapeHtml(value: string): string { const span = document.createElement('span'); span.textContent = value; return span.innerHTML.replace(/"/g, '&quot;'); }
