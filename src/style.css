@@ -673,3 +673,13 @@ button:focus-visible, input:focus-visible { outline: 2px solid var(--accent-blue
 .projection-switch-small { padding: 4px 6px; min-height: 30px; gap: 4px; }
 @media (max-width: 600px) { .sidebar { width: min(280px, 70vw); min-width: 0; } .sidebar-stats-section { height: 340px; max-height: 60%; min-height: 100px; } }
 @media (prefers-reduced-motion: reduce) { .switch-thumb { transition: none; } }
+
+.theme-toggle { width: 36px; height: 36px; padding: 0; justify-content: center; flex-shrink: 0; }
+.theme-moon { display: none; }
+:root[data-theme="light"] .theme-sun { display: none; }
+:root[data-theme="light"] .theme-moon { display: block; }
+
+.fit-switch { display: inline-flex; align-items: center; gap: 2px; padding: 3px; height: 36px; border: 1px solid var(--border-color); border-radius: 20px; background: var(--bg-primary); flex-shrink: 0; }
+.fit-option { display: flex; align-items: center; justify-content: center; width: 32px; height: 28px; padding: 0; border: 0; border-radius: 16px; background: transparent; color: var(--text-secondary); cursor: pointer; }
+.fit-option:hover, .fit-option:focus-visible { background: var(--bg-tertiary); color: var(--accent-blue); }
+.fit-option:active { background: var(--accent-blue); color: var(--bg-primary); }

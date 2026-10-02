@@ -9,7 +9,6 @@ function init() {
     const viewportContainer = document.getElementById('viewport-container') as HTMLElement;
     const fileInput = document.getElementById('file-input') as HTMLInputElement;
     const btnOpenFile = document.getElementById('btn-open-file') as HTMLButtonElement;
-    const btnLoadSample = document.getElementById('btn-load-sample') as HTMLButtonElement;
     const btnFitView = document.getElementById('btn-fit-view') as HTMLButtonElement;
     const btnFitCage = document.getElementById('btn-fit-cage') as HTMLButtonElement;
     const btnToggleCamera = document.getElementById('btn-toggle-camera') as HTMLButtonElement | null;
@@ -45,7 +44,7 @@ function init() {
     try { theme = localStorage.getItem('amodel-theme') === 'light' ? 'light' : 'dark'; } catch {}
     const applyTheme = () => {
         document.documentElement.dataset.theme = theme; viewer.setTheme(theme);
-        themeButton.textContent = theme === 'dark' ? 'Light theme' : 'Dark theme';
+        themeButton.title = 'Switch to ' + (theme === 'dark' ? 'light' : 'dark') + ' theme';
         themeButton.setAttribute('aria-label', 'Switch to ' + (theme === 'dark' ? 'light' : 'dark') + ' theme');
     };
     applyTheme();
@@ -124,18 +123,6 @@ function init() {
 
     const sampleUrl = './models/ENCC100323640.amodel';
     const sampleName = 'ENCC100323640.amodel';
-
-    btnLoadSample.addEventListener('click', () => {
-        loadSampleModel(sampleUrl, sampleName, {
-            onLoadStart: (name) => {
-                showLoading(`Loading benchmark sample "${name}"...`);
-                footerFilename.textContent = name;
-                footerStatus.textContent = 'Downloading and parsing...';
-            },
-            onLoadSuccess: handleModelLoaded,
-            onLoadError: handleModelError
-        });
-    });
 
     btnFitView.addEventListener('click', () => {
         viewer.fitView();

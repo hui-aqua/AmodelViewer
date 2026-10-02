@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AquaSim Web Viewer — Engineering 3D Model Inspection</title>
     <meta name="description" content="Browser-based 3D structural model viewer for AquaSim .amodel engineering simulation files." />
-  <script type="module" crossorigin src="./assets/index-BoT8AuGv.js"></script>
+  <script type="module" crossorigin src="./assets/index-BcC_-Yyq.js"></script>
   <link rel="modulepreload" crossorigin href="./assets/three-DkjviHIg.js">
-  <link rel="stylesheet" crossorigin href="./assets/index-CTASsB6m.css">
+  <link rel="stylesheet" crossorigin href="./assets/index-DFr8IQPX.css">
 </head>
 <body>
     <div id="app" class="app-layout">
@@ -28,7 +28,10 @@
             </div>
 
             <div class="toolbar-actions">
-                <button id="btn-toggle-theme" class="btn btn-icon">Light theme</button>
+                <button id="btn-toggle-theme" class="btn btn-icon theme-toggle" aria-label="Switch to light theme" title="Switch to light theme">
+                    <svg class="theme-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+                    <svg class="theme-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.9 13A9 9 0 0 1 11 3.1 9 9 0 1 0 20.9 13Z"/></svg>
+                </button>
                 <input type="file" id="file-input" style="display: none;" />
                 <button id="btn-open-file" class="btn btn-primary" title="Open .amodel file from your computer">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -38,22 +41,14 @@
                     </svg>
                     Open .amodel
                 </button>
-                <button id="btn-load-sample" class="btn btn-secondary" title="Load the benchmark ENCC100323640 model">
-                    Load Sample (ENCC100323640)
-                </button>
-                <button id="btn-fit-view" class="btn btn-icon" title="Fit Camera to Entire Model">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>
-                    </svg>
-                    Fit All
-                </button>
-                <button id="btn-fit-cage" class="btn btn-icon" title="Focus Camera on Floating Collar and Net Cage">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <circle cx="12" cy="12" r="4"></circle>
-                    </svg>
-                    Focus Cage
-                </button>
+                <div class="fit-switch" role="group" aria-label="Camera framing">
+                    <button id="btn-fit-view" class="fit-option" aria-label="Fit entire model" title="Fit entire model">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                    </button>
+                    <button id="btn-fit-cage" class="fit-option" aria-label="Focus cage" title="Focus floating collar and net cage">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><path d="M12 1v4m0 14v4M1 12h4m14 0h4"/></svg>
+                    </button>
+                </div>
                 <div class="toolbar-divider"></div>
                 <button id="btn-toggle-camera" class="projection-switch" role="switch" aria-checked="false" aria-label="Orthographic projection" title="Perspective projection ? switch to Orthographic"><span class="projection-option projection-perspective"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="M5 5 19 8v8L5 19zM5 5v14M12 6.5v11M5 12h14"/></svg></span><span class="switch-track"><span class="switch-thumb"></span></span><span class="projection-option projection-orthographic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="1"/><path d="M4 12h16M12 4v16"/></svg></span></button>
                 <select id="select-render-mode" class="select-mode" title="Display mode for structural elements">
